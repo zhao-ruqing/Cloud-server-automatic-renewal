@@ -1,0 +1,59 @@
+schedule:
+  interval_days: 5
+  state_file: "data/last_run.json"
+
+ai:
+  api_base: "https://api.deepseek.com/v1"
+  api_key_env: "DEEPSEEK_API_KEY"
+  model: "deepseek-v4-flash"
+  prompt_file: "prompts/article.txt"
+  min_body_length: 100
+  max_body_length: 300
+  required_keywords:
+    - "三丰云服务器"
+    - "免费云服务器"
+  max_retries: 3
+
+zhihu:
+  write_url: "https://zhuanlan.zhihu.com/write"
+  topics:
+    - "三丰云服务器"
+  auth_state: "auth/zhihu_state.json"
+  profile_dir: "zhihu_profile"
+  publish_timeout_sec: 60
+  before_publish_delay_sec: 2
+  after_publish_delay_sec: 3
+
+sanfeng:
+  enabled: true
+  submit_form: false
+  login_url: "https://www.sanfengyun.com/login/"
+  form_url: "https://www.sanfengyun.com/control/#/freeServer/532218"
+  auth_state: "auth/sanfeng_state.json"
+  profile_dir: "sanfeng_profile"
+  submit_timeout_sec: 30
+  login_wait_sec: 2
+  form_load_wait_sec: 3
+  pause_before_close_sec: 5
+
+browser:
+  headless: false
+  slow_mo: 100
+  executable_path: "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe"
+  args:
+    - "--disable-blink-features=AutomationControlled"
+  viewport:
+    width: 1280
+    height: 900
+  viewport_jitter:
+    width: 80
+    height: 60
+  viewport_min:
+    width: 1180
+    height: 820
+
+output:
+  base_dir: "output"
+
+logging:
+  file: "logs/run.log"

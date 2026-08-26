@@ -1,0 +1,10 @@
+auth/
+auth/*_profile/
+output/
+logs/
+data/
+.env
+__pycache__/
+*.pyc
+.venv/
+venv/
