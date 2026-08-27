@@ -17,6 +17,17 @@ def parse_expiry_datetime(text: str) -> datetime | None:
     return datetime.strptime(match.group(1), "%Y-%m-%d %H:%M:%S")
 
 
+def parse_expiry_after_label(text: str, label: str) -> datetime | None:
+    """Take the datetime that follows the expiry label, not an earlier date in the same block."""
+    pattern = re.compile(
+        re.escape(label) + r"\s*[:\uff1a]?\s*(\d{4}-\d{2}-\d{2}\s+\d{2}:\d{2}:\d{2})"
+    )
+    match = pattern.search(text)
+    if not match:
+        return None
+    return datetime.strptime(match.group(1), "%Y-%m-%d %H:%M:%S")
+
+
 def hours_until(expiry: datetime, now: datetime | None = None) -> float:
     now = now or datetime.now()
     return (expiry - now).total_seconds() / 3600

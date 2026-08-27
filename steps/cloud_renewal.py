@@ -2,7 +2,6 @@
 """Shared cloud renewal: login, read expiry, fill renewal form."""
 
 import logging
-import re
 from datetime import datetime
 from pathlib import Path
 from typing import Any
@@ -10,11 +9,10 @@ from typing import Any
 from playwright.sync_api import Page, TimeoutError as PlaywrightTimeoutError
 
 from utils.browser import BrowserSession, launch_browser
-from utils.expiry_scheduler import parse_expiry_datetime
+from utils.expiry_scheduler import parse_expiry_after_label, parse_expiry_datetime
 from utils.selectors import CLOUD
 
 logger = logging.getLogger("sanfeng")
-EXPIRY_PATTERN = re.compile(r"(\d{4}-\d{2}-\d{2}\s+\d{2}:\d{2}:\d{2})")
 
 
 class CloudRenewalError(Exception):
@@ -52,24 +50,36 @@ def _do_login(page: Page, wait_sec: float, provider: str) -> None:
 
 
 def read_expiry_from_page(page: Page) -> datetime:
-    labels = page.get_by_text(CLOUD["expiry_label"], exact=False)
+    label = CLOUD["expiry_label"]
+
+    # Prefer datetime immediately after the "expiry" label (not "created at").
+    body_text = page.locator("body").inner_text()
+    expiry = parse_expiry_after_label(body_text, label)
+    if expiry:
+        logger.info("Parsed expiry after label: %s", expiry.strftime("%Y-%m-%d %H:%M:%S"))
+        return expiry
+
+    labels = page.get_by_text(label, exact=False)
     for i in range(labels.count()):
-        label = labels.nth(i)
+        item = labels.nth(i)
         try:
-            row = label.locator("xpath=ancestor::div[contains(@class,'el-row')][1]")
-            text = row.inner_text(timeout=3000)
-            expiry = parse_expiry_datetime(text)
-            if expiry:
-                return expiry
+            next_col = item.locator(
+                "xpath=ancestor::div[contains(@class,'el-col')][1]"
+                "/following-sibling::div[contains(@class,'el-col')][1]"
+            )
+            if next_col.count() > 0:
+                expiry = parse_expiry_datetime(next_col.first.inner_text(timeout=3000))
+                if expiry:
+                    logger.info(
+                        "Parsed expiry from next column: %s",
+                        expiry.strftime("%Y-%m-%d %H:%M:%S"),
+                    )
+                    return expiry
         except Exception:
             continue
 
-    body_text = page.locator("body").inner_text()
-    matches = EXPIRY_PATTERN.findall(body_text)
-    if not matches:
-        page.screenshot(path="logs/expiry_not_found.png", full_page=False)
-        raise CloudRenewalError("Expiry datetime not found on page")
-    return parse_expiry_datetime(matches[0])  # type: ignore[arg-type]
+    page.screenshot(path="logs/expiry_not_found.png", full_page=False)
+    raise CloudRenewalError("Expiry datetime not found after label")
 
 
 def fetch_cloud_expiry(provider_cfg: dict[str, Any], browser_cfg: dict[str, Any], provider: str) -> datetime:
