@@ -26,7 +26,7 @@ zhihu:
 sanfeng:
   enabled: true
   fill_form: true
-  submit_form: false
+  submit_form: true
   login_url: "https://www.sanfengyun.com/login/"
   server_url: "https://www.sanfengyun.com/control/#/freeServer/532218"
   auth_state: "auth/sanfeng_state.json"
@@ -36,7 +36,7 @@ sanfeng:
   run_hours_before_max: 23
   login_wait_sec: 2
   form_load_wait_sec: 3
-  pause_before_close_sec: 30
+  pause_before_close_sec: 5
   content:
     brand_name: "三丰云"
     topics:
@@ -48,7 +48,7 @@ sanfeng:
 abeiyun:
   enabled: true
   fill_form: true
-  submit_form: false
+  submit_form: true
   login_url: "https://www.abeiyun.com/login/"
   server_url: "https://www.abeiyun.com/control/#/freeServer/1883838"
   auth_state: "auth/abeiyun_state.json"
@@ -58,7 +58,7 @@ abeiyun:
   run_hours_before_max: 23
   login_wait_sec: 2
   form_load_wait_sec: 3
-  pause_before_close_sec: 30
+  pause_before_close_sec: 5
   content:
     brand_name: "阿贝云"
     topics:

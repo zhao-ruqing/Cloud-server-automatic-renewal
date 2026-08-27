@@ -187,10 +187,15 @@ def submit_cloud_renewal(
         if provider_cfg.get("fill_form", True):
             _fill_renewal_form(page, screenshot_path, zhihu_url)
             form_filled = True
-            logger.info("[%s] form filled, manual submit required", provider)
-
-        if provider_cfg.get("submit_form"):
+            if provider_cfg.get("submit_form", True):
+                page.locator(CLOUD["submit_btn"]).first.click()
+                page.wait_for_timeout(2000)
+                logger.info("[%s] form filled and submitted", provider)
+            else:
+                logger.info("[%s] form filled, manual submit required", provider)
+        elif provider_cfg.get("submit_form"):
             page.locator(CLOUD["submit_btn"]).first.click()
+            page.wait_for_timeout(2000)
             logger.info("[%s] auto submit clicked", provider)
 
         pause_sec = provider_cfg.get("pause_before_close_sec", 30)
@@ -208,7 +213,7 @@ def submit_cloud_renewal(
             "zhihu_url": zhihu_url,
             "screenshot_path": str(screenshot_path),
             "fill_form": form_filled,
-            "submit_form": bool(provider_cfg.get("submit_form")),
+            "submit_form": bool(provider_cfg.get("submit_form", True)),
         }
     finally:
         if session:
