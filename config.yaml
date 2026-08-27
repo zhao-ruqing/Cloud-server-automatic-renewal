@@ -1,6 +1,7 @@
 schedule:
   mode: expiry
-  # Windows task: run `python main.py` every hour
+  # Manual:  python main.py
+  # Task:    python main.py --scheduled
 
 ai:
   api_base: "https://api.deepseek.com/v1"

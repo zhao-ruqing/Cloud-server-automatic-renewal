@@ -40,9 +40,10 @@ def should_run_by_expiry(
     hours_before_max: float,
     state_file: str,
     force: bool = False,
+    ignore_cycle: bool = False,
 ) -> tuple[bool, str]:
     if force:
-        return True, "force mode"
+        return True, "force mode (ignore window and cycle)"
 
     remaining = hours_until(expiry)
     if remaining < 0:
@@ -53,13 +54,15 @@ def should_run_by_expiry(
             f"[{hours_before_min}, {hours_before_max}]h"
         )
 
-    state_path = ROOT / state_file
-    state = load_json(state_path)
-    expiry_key = expiry.strftime("%Y-%m-%d %H:%M:%S")
-    if state.get("last_expiry_at") == expiry_key and state.get("last_success_at"):
-        return False, f"expiry {expiry_key} already processed this cycle"
+    if not ignore_cycle:
+        state_path = ROOT / state_file
+        state = load_json(state_path)
+        expiry_key = expiry.strftime("%Y-%m-%d %H:%M:%S")
+        if state.get("last_expiry_at") == expiry_key and state.get("last_success_at"):
+            return False, f"expiry {expiry_key} already processed this cycle"
 
-    return True, f"{remaining:.1f}h until expiry, in window, run"
+    suffix = "manual rerun" if ignore_cycle else "run"
+    return True, f"{remaining:.1f}h until expiry, in window, {suffix}"
 
 
 def mark_provider_success(

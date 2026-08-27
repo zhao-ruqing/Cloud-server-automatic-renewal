@@ -34,9 +34,12 @@ def resolve_providers_to_run(
     force: bool,
     logger,
     only_provider: str | None = None,
+    scheduled: bool = False,
 ) -> list[str]:
     to_run: list[str] = []
     browser_cfg = config["browser"]
+    # Manual run: still check expiry window, but allow rerun in the same cycle.
+    ignore_cycle = not scheduled and not force
 
     for name in CLOUD_PROVIDERS:
         if only_provider and name != only_provider:
@@ -60,6 +63,7 @@ def resolve_providers_to_run(
                 hours_before_min=cfg.get("run_hours_before_min", 10),
                 hours_before_max=cfg.get("run_hours_before_max", 23),
                 state_file=cfg.get("state_file", f"data/{name}_schedule.json"),
+                ignore_cycle=ignore_cycle,
             )
             logger.info(
                 "[%s] expiry=%s | %s",
@@ -137,6 +141,7 @@ def main(
     force: bool = False,
     keepalive_only: bool = False,
     only_provider: str | None = None,
+    scheduled: bool = False,
 ) -> int:
     load_dotenv(ROOT / ".env")
     config = load_config()
@@ -149,8 +154,11 @@ def main(
             run_zhihu_keepalive(config)
         return 0
 
+    if not scheduled and not force:
+        logger.info("Manual run: in expiry window will rerun even if already processed")
+
     providers = resolve_providers_to_run(
-        config, force, logger, only_provider=only_provider
+        config, force, logger, only_provider=only_provider, scheduled=scheduled
     )
 
     if not providers:
@@ -183,7 +191,16 @@ def main(
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--force", action="store_true", help="Ignore expiry window")
+    parser.add_argument(
+        "--force",
+        action="store_true",
+        help="Run all enabled providers now (ignore expiry window)",
+    )
+    parser.add_argument(
+        "--scheduled",
+        action="store_true",
+        help="For task scheduler: skip if already processed this cycle",
+    )
     parser.add_argument(
         "--provider",
         choices=CLOUD_PROVIDERS,
@@ -196,5 +213,6 @@ if __name__ == "__main__":
             force=args.force,
             keepalive_only=args.keepalive_only,
             only_provider=args.provider,
+            scheduled=args.scheduled,
         )
     )
