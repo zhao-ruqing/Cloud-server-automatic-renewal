@@ -59,8 +59,25 @@ def _render_prompt(template: str, **values: str | int) -> str:
     return result
 
 
-def generate_content(config: dict[str, Any]) -> dict[str, str]:
+def _provider_content_cfg(config: dict[str, Any], provider: str) -> dict[str, Any]:
     ai_cfg = config["ai"]
+    content = (config.get(provider) or {}).get("content") or {}
+    return {
+        "brand_name": content.get("brand_name") or provider,
+        "topics": content.get("topics") or [],
+        "required_keywords": content.get("required_keywords") or [],
+        "prompt_file": content.get("prompt_file") or ai_cfg["prompt_file"],
+        "min_body_length": ai_cfg["min_body_length"],
+        "max_body_length": ai_cfg["max_body_length"],
+        "max_retries": ai_cfg.get("max_retries", 3),
+        "api_base": ai_cfg["api_base"],
+        "api_key_env": ai_cfg["api_key_env"],
+        "model": ai_cfg["model"],
+    }
+
+
+def generate_content(config: dict[str, Any], provider: str) -> dict[str, str]:
+    ai_cfg = _provider_content_cfg(config, provider)
     api_key = os.environ.get(ai_cfg["api_key_env"], "")
     if not api_key:
         raise ContentGenerationError(
@@ -68,12 +85,15 @@ def generate_content(config: dict[str, Any]) -> dict[str, str]:
         )
 
     template = _load_prompt_template(ai_cfg["prompt_file"])
-    topics = "\u3001".join(config["zhihu"]["topics"])
+    topics = "\u3001".join(ai_cfg["topics"])
+    keywords = "\u3001".join(ai_cfg["required_keywords"])
     prompt = _render_prompt(
         template,
+        brand_name=ai_cfg["brand_name"],
+        keywords=keywords,
+        topics=topics,
         min_body_length=ai_cfg["min_body_length"],
         max_body_length=ai_cfg["max_body_length"],
-        topics=topics,
     )
 
     client = OpenAI(api_key=api_key, base_url=ai_cfg["api_base"])
@@ -84,12 +104,24 @@ def generate_content(config: dict[str, Any]) -> dict[str, str]:
         try:
             response = client.chat.completions.create(
                 model=ai_cfg["model"],
-                messages=[{"role": "user", "content": prompt}],
+                messages=[
+                    {
+                        "role": "system",
+                        "content": (
+                            "\u4f60\u53ea\u80fd\u7528\u7b80\u4f53\u4e2d\u6587\u5199\u4f5c\u3002"
+                            "title \u548c body \u5fc5\u987b\u662f\u7b80\u4f53\u4e2d\u6587\u3002"
+                        ),
+                    },
+                    {"role": "user", "content": prompt},
+                ],
                 temperature=0.9,
             )
             raw = response.choices[0].message.content or ""
             content = _parse_json_response(raw)
             _validate_content(content, ai_cfg)
+            content["topics"] = list(ai_cfg["topics"])
+            content["provider"] = provider
+            content["brand_name"] = ai_cfg["brand_name"]
             return content
         except Exception as exc:
             last_error = exc

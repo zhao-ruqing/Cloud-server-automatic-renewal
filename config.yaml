@@ -9,15 +9,10 @@ ai:
   prompt_file: "prompts/article.txt"
   min_body_length: 100
   max_body_length: 300
-  required_keywords:
-    - "三丰云服务器"
-    - "免费云服务器"
   max_retries: 3
 
 zhihu:
   write_url: "https://zhuanlan.zhihu.com/write"
-  topics:
-    - "三丰云服务器"
   auth_state: "auth/zhihu_state.json"
   profile_dir: "zhihu_profile"
   publish_timeout_sec: 60
@@ -41,6 +36,13 @@ sanfeng:
   login_wait_sec: 2
   form_load_wait_sec: 3
   pause_before_close_sec: 30
+  content:
+    brand_name: "三丰云"
+    topics:
+      - "三丰云服务器"
+    required_keywords:
+      - "三丰云服务器"
+      - "免费云服务器"
 
 abeiyun:
   enabled: true
@@ -56,6 +58,13 @@ abeiyun:
   login_wait_sec: 2
   form_load_wait_sec: 3
   pause_before_close_sec: 30
+  content:
+    brand_name: "阿贝云"
+    topics:
+      - "阿贝云服务器"
+    required_keywords:
+      - "阿贝云服务器"
+      - "免费云服务器"
 
 browser:
   headless: false

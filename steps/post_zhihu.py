@@ -139,9 +139,12 @@ def post_zhihu(
     body: str,
     config: dict[str, Any],
     output_dir: Path,
+    topics: list[str] | None = None,
+    screenshot_name: str = "article.png",
 ) -> dict[str, str]:
     zhihu_cfg = config["zhihu"]
     browser_cfg = config["browser"]
+    topic_list = topics if topics is not None else []
     session: BrowserSession | None = None
 
     try:
@@ -160,7 +163,7 @@ def post_zhihu(
         _fill_title(page, title)
         _fill_body(page, body)
 
-        for topic in zhihu_cfg["topics"]:
+        for topic in topic_list:
             _add_topic(page, topic)
 
         article_url = _click_publish(
@@ -169,7 +172,7 @@ def post_zhihu(
             before_delay_sec=zhihu_cfg.get("before_publish_delay_sec", 2),
             after_delay_sec=zhihu_cfg.get("after_publish_delay_sec", 3),
         )
-        screenshot_path = output_dir / "article.png"
+        screenshot_path = output_dir / screenshot_name
         final_url, screenshot_viewport = _open_article_and_screenshot(
             page, article_url, screenshot_path, browser_cfg
         )
