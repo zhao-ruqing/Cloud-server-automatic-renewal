@@ -57,8 +57,8 @@ def resolve_providers_to_run(
             expiry = fetch_cloud_expiry(cfg, browser_cfg, name)
             ok, reason = should_run_by_expiry(
                 expiry,
-                hours_before_min=cfg.get("run_hours_before_min", 20),
-                hours_before_max=cfg.get("run_hours_before_max", 22),
+                hours_before_min=cfg.get("run_hours_before_min", 10),
+                hours_before_max=cfg.get("run_hours_before_max", 23),
                 state_file=cfg.get("state_file", f"data/{name}_schedule.json"),
             )
             logger.info(
