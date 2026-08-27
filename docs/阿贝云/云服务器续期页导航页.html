@@ -1,0 +1,2742 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <link rel="shortcut icon" href="https://img.abeiyun.com/img/favicon.ico" />
+    <title>阿贝云-控制台</title>
+    <link
+      href="./static/css/app.a12b17b032d38bc6c4100d48673ee219.css"
+      rel="stylesheet"
+    />
+    <style>
+      ._wrapper_1ooyb_1 {
+        position: fixed;
+        inset: 0;
+        z-index: 2147483641; /* 确保在所有元素之上，除了 panel */
+        cursor: wait;
+        overflow: hidden;
+
+        display: none;
+      }
+
+      ._wrapper_1ooyb_1._visible_1ooyb_11 {
+        display: block;
+      }
+      /* AI 光标样式 */
+      ._cursor_1dgwb_2 {
+        position: absolute;
+        width: var(--cursor-size, 75px);
+        height: var(--cursor-size, 75px);
+        pointer-events: none;
+        z-index: 10000;
+      }
+
+      ._cursorBorder_1dgwb_10 {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(
+          45deg,
+          rgb(57, 182, 255),
+          rgb(189, 69, 251)
+        );
+        mask-image: url("data:image/svg+xml,%3csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20100%20100'%20fill='none'%3e%3cg%3e%3cpath%20d='M%2015%2042%20L%2015%2036.99%20Q%2015%2031.99%2023.7%2031.99%20L%2028.05%2031.99%20Q%2032.41%2031.99%2032.41%2021.99%20L%2032.41%2017%20Q%2032.41%2012%2041.09%2016.95%20L%2076.31%2037.05%20Q%2085%2042%2076.31%2046.95%20L%2041.09%2067.05%20Q%2032.41%2072%2032.41%2062.01%20L%2032.41%2057.01%20Q%2032.41%2052.01%2023.7%2052.01%20L%2019.35%2052.01%20Q%2015%2052.01%2015%2047.01%20Z'%20fill='none'%20stroke='%23000000'%20stroke-width='6'%20stroke-miterlimit='10'%20style='stroke:%20light-dark(rgb(0,%200,%200),%20rgb(255,%20255,%20255));'/%3e%3c/g%3e%3c/svg%3e");
+        mask-size: 100% 100%;
+        mask-repeat: no-repeat;
+
+        transform-origin: center;
+        transform: rotate(-135deg) scale(1.2);
+        margin-left: -10px;
+        margin-top: -18px;
+      }
+
+      ._cursorFilling_1dgwb_25 {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        background: url("data:image/svg+xml,%3csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20100%20100'%3e%3cdefs%3e%3c/defs%3e%3cg%20xmlns='http://www.w3.org/2000/svg'%20style='filter:%20drop-shadow(light-dark(rgba(0,%200,%200,%200.4),%20rgba(237,%20237,%20237,%200.4))%203px%204px%204px);'%3e%3cpath%20d='M%2015%2042%20L%2015%2036.99%20Q%2015%2031.99%2023.7%2031.99%20L%2028.05%2031.99%20Q%2032.41%2031.99%2032.41%2021.99%20L%2032.41%2017%20Q%2032.41%2012%2041.09%2016.95%20L%2076.31%2037.05%20Q%2085%2042%2076.31%2046.95%20L%2041.09%2067.05%20Q%2032.41%2072%2032.41%2062.01%20L%2032.41%2057.01%20Q%2032.41%2052.01%2023.7%2052.01%20L%2019.35%2052.01%20Q%2015%2052.01%2015%2047.01%20Z'%20fill='%23ffffff'%20stroke='none'%20style='fill:%20%23ffffff;'/%3e%3c/g%3e%3c/svg%3e");
+        background-size: 100% 100%;
+        background-repeat: no-repeat;
+
+        transform-origin: center;
+        transform: rotate(-135deg) scale(1.2);
+        margin-left: -10px;
+        margin-top: -18px;
+      }
+
+      ._cursorRipple_1dgwb_39 {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        margin-left: -50%;
+        margin-top: -50%;
+
+        &::after {
+          content: "";
+          opacity: 0;
+          position: absolute;
+          inset: 0;
+          border: 4px solid rgba(57, 182, 255, 1);
+          border-radius: 50%;
+        }
+      }
+
+      ._cursor_1dgwb_2._clicking_1dgwb_57 ._cursorRipple_1dgwb_39::after {
+        animation: _cursor-ripple_1dgwb_1 300ms ease-out forwards;
+      }
+
+      @keyframes _cursor-ripple_1dgwb_1 {
+        0% {
+          transform: scale(0);
+          opacity: 1;
+        }
+        100% {
+          transform: scale(2);
+          opacity: 0;
+        }
+      }
+      /*$vite$:1*/
+    </style>
+  </head>
+  <body>
+    <div id="app">
+      <div class="header link-undecorated">
+        <div class="zj-logo pull-left">
+          <a href="/" target="_blank" title="返回用户中心首页" class="text-hide"
+            >用户中心首页</a
+          >
+        </div>
+        <div class="header-main text-right">
+          <div class="preview pull-left">
+            <a
+              href="javascript:void(0)"
+              title="总览"
+              class="logo-preview z-font-size-16"
+              >总览</a
+            >
+          </div>
+          <div class="notice pull-left">
+            <span>1</span>
+            <a href="/act/vip" target="_blank">终身云vip来了 &nbsp;&gt;查看</a>
+          </div>
+          <div class="pull-right">
+            <div class="header-link header-link-help">
+              帮助文档
+              <div class="header-drop-list header-list-help z-box-sizing">
+                <form
+                  action="/help/"
+                  target="_blank"
+                  class="header-help-form"
+                  style="line-height: 1"
+                >
+                  <input
+                    type="text"
+                    placeholder="请输入您想了解的问题、关键词或产品服务"
+                    name="k"
+                    class="header-help-input z-box-sizing"
+                  />
+                  <input type="submit" value="" class="submit-header-help" />
+                </form>
+              </div>
+            </div>
+            <div class="header-link header-link-message">
+              <div class="el-badge" style="text-indent: 0px; line-height: 0">
+                <span class="z-font-size-14">站内信</span
+                ><sup
+                  class="el-badge__content el-badge__content--undefined is-fixed"
+                  >0</sup
+                >
+              </div>
+              <div class="header-drop-list header-list-messages z-box-sizing">
+                <div class="message-empty">
+                  您暂时没有站内消息，<a href="javascript:;" class="z-color-a"
+                    >查看更多 &gt;</a
+                  >
+                </div>
+                <ul style="display: none"></ul>
+                <div
+                  class="z-textAlign-center header-message-all"
+                  style="display: none"
+                >
+                  <a href="javascript:;" class="black-link">查看全部未读消息</a>
+                </div>
+              </div>
+            </div>
+            <div class="header-link header-link-payment">
+              费用
+              <div class="header-drop-list header-list-finance z-box-sizing">
+                <div class="text-muted">
+                  您的账户余额
+                  <a href="javascript:;" class="pull-right z-color-a">充值</a>
+                </div>
+                <div
+                  class="header-finance-money z-color-66-orange z-margin-bottom-5-precent"
+                >
+                  <span class="z-font-size-24"></span
+                  ><span class="z-font-size-14">元</span>
+                </div>
+                <div class="header-finance-btns clearfix">
+                  <button
+                    type="button"
+                    class="el-button el-button--default el-button--small"
+                  >
+                    <!----><!----><span>优惠券</span>
+                  </button>
+                  <button
+                    type="button"
+                    class="el-button el-button--default el-button--small"
+                  >
+                    <!----><!----><span>开具发票</span>
+                  </button>
+                </div>
+                <ul class="header-finance-links">
+                  <li class="header-finance-last-link">
+                    <a href="javascript:;">收支明细</a>
+                  </li>
+                </ul>
+              </div>
+            </div>
+            <div class="header-link header-link-workorder">
+              工单
+              <ul class="header-drop-list header-list-workorder">
+                <li><a href="javascript:;">提交工单</a></li>
+                <li><a href="javascript:;">我的工单</a></li>
+              </ul>
+            </div>
+            <div
+              class="header-link header-link-user header-link-drop z-box-sizing"
+            >
+              <span class="header-username z-font-size-14">您好，</span>
+              <ul class="header-drop-list header-user-links">
+                <li><a href="javascript:;">基本信息</a></li>
+                <li><a href="javascript:;">安全设置</a></li>
+                <li><a href="javascript:;">实名认证</a></li>
+                <li><a href="javascript:;">操作日志</a></li>
+                <li class="header-finance-last-link">
+                  <a href="javascript:;">安全退出</a>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="main">
+        <div class="menu-list">
+          <ul>
+            <li class="">
+              <a href="javascript:void(0)" class="z-font-size-14">账户</a>
+            </li>
+            <li class="">
+              <a href="javascript:void(0)" class="z-font-size-14">财务</a>
+            </li>
+            <li class="active">
+              <a href="javascript:void(0)" class="z-font-size-14">产品</a>
+            </li>
+            <li class="">
+              <a href="javascript:void(0)" class="z-font-size-14">工单</a>
+            </li>
+            <li class="">
+              <a href="javascript:void(0)" class="z-font-size-14">备案</a>
+            </li>
+          </ul>
+        </div>
+        <div data-v-7a9ee2d0="" class="box">
+          <div data-v-7a9ee2d0="" class="left navbar-collapse">
+            <dl data-v-7a9ee2d0="">
+              <dt
+                data-v-7a9ee2d0=""
+                class="z-font-weight-700 z-font-size-12 active"
+              >
+                <i
+                  data-v-7a9ee2d0=""
+                  slot="after"
+                  class="arrow iconfont icon-youjiantou rotateDown"
+                  style="font-size: 12px"
+                ></i>
+                免费产品
+              </dt>
+              <dd data-v-7a9ee2d0="" class="menu-items" style="height: 120px">
+                <div data-v-7a9ee2d0="" class="menu-item">
+                  <i
+                    data-v-7a9ee2d0=""
+                    class="menu-icon menu-icon-ziliaoxiugai"
+                  ></i>
+                  免费虚拟主机
+                </div>
+                <div data-v-7a9ee2d0="" class="menu-item active">
+                  <i
+                    data-v-7a9ee2d0=""
+                    class="menu-icon menu-icon-ziliaoxiugai"
+                  ></i>
+                  免费云服务器
+                </div>
+                <div data-v-7a9ee2d0="" class="menu-item">
+                  <i
+                    data-v-7a9ee2d0=""
+                    class="menu-icon menu-icon-ziliaoxiugai"
+                  ></i>
+                  免备案服务
+                </div>
+              </dd>
+            </dl>
+            <dl data-v-7a9ee2d0="">
+              <dt data-v-7a9ee2d0="" class="z-font-weight-700 z-font-size-12">
+                <i
+                  data-v-7a9ee2d0=""
+                  slot="after"
+                  class="arrow iconfont icon-youjiantou"
+                  style="font-size: 12px"
+                ></i>
+                虚拟主机
+              </dt>
+              <dd data-v-7a9ee2d0="" class="menu-items" style="height: 0px">
+                <div data-v-7a9ee2d0="" class="menu-item">
+                  <i
+                    data-v-7a9ee2d0=""
+                    class="menu-icon menu-icon-ziliaoxiugai"
+                  ></i>
+                  我的虚拟主机
+                </div>
+              </dd>
+            </dl>
+            <dl data-v-7a9ee2d0="">
+              <dt data-v-7a9ee2d0="" class="z-font-weight-700 z-font-size-12">
+                <i
+                  data-v-7a9ee2d0=""
+                  slot="after"
+                  class="arrow iconfont icon-youjiantou"
+                  style="font-size: 12px"
+                ></i>
+                云服务器
+              </dt>
+              <dd data-v-7a9ee2d0="" class="menu-items" style="height: 0px">
+                <div data-v-7a9ee2d0="" class="menu-item">
+                  <i
+                    data-v-7a9ee2d0=""
+                    class="menu-icon menu-icon-ziliaoxiugai"
+                  ></i>
+                  我的云服务器
+                </div>
+                <div data-v-7a9ee2d0="" class="menu-item active">
+                  <i
+                    data-v-7a9ee2d0=""
+                    class="menu-icon menu-icon-ziliaoxiugai"
+                  ></i>
+                  提交白名单
+                </div>
+                <div data-v-7a9ee2d0="" class="menu-item">
+                  <i
+                    data-v-7a9ee2d0=""
+                    class="menu-icon menu-icon-ziliaoxiugai"
+                  ></i>
+                  我的白名单
+                </div>
+              </dd>
+            </dl>
+            <dl data-v-7a9ee2d0="">
+              <dt data-v-7a9ee2d0="" class="z-font-weight-700 z-font-size-12">
+                <i
+                  data-v-7a9ee2d0=""
+                  slot="after"
+                  class="arrow iconfont icon-youjiantou"
+                  style="font-size: 12px"
+                ></i>
+                域名
+              </dt>
+              <dd data-v-7a9ee2d0="" class="menu-items" style="height: 0px">
+                <div data-v-7a9ee2d0="" class="menu-item">
+                  <i
+                    data-v-7a9ee2d0=""
+                    class="menu-icon menu-icon-ziliaoxiugai"
+                  ></i>
+                  我的域名
+                </div>
+                <div data-v-7a9ee2d0="" class="menu-item active">
+                  <i
+                    data-v-7a9ee2d0=""
+                    class="menu-icon menu-icon-ziliaoxiugai"
+                  ></i>
+                  域名模板
+                </div>
+                <div data-v-7a9ee2d0="" class="menu-item">
+                  <i
+                    data-v-7a9ee2d0=""
+                    class="menu-icon menu-icon-ziliaoxiugai"
+                  ></i>
+                  域名转入
+                </div>
+              </dd>
+            </dl>
+            <div
+              data-v-7a9ee2d0=""
+              class="viewFramework-product-navbar-collapse"
+            >
+              <div data-v-7a9ee2d0="" class="product-navbar-collapse-inner">
+                <div
+                  data-v-7a9ee2d0=""
+                  class="product-navbar-collapse-bg z-box-sizing"
+                ></div>
+                <div data-v-7a9ee2d0="" class="product-navbar-collapse">
+                  <span
+                    data-v-7a9ee2d0=""
+                    class="iconfont icon-collapse-right"
+                    style="display: inline"
+                  ></span>
+                  <!---->
+                </div>
+              </div>
+            </div>
+          </div>
+          <div data-v-78885a38="" data-v-7a9ee2d0="" class="page">
+            <div data-v-78885a38="" class="page-main">
+              <div data-v-78885a38="" class="panel-heading">
+                <button
+                  data-v-78885a38=""
+                  type="button"
+                  class="el-button el-button--default el-button--small is-plain"
+                >
+                  <!----><i class="el-icon-arrow-left"></i
+                  ><!---->
+                </button>
+                <span
+                  data-v-78885a38=""
+                  class="se-panel-title z-padding-left-5-precent ver-sub"
+                  >免费云服务器管理</span
+                >
+              </div>
+              <div data-v-78885a38="" class="server-header server-centos">
+                <table data-v-78885a38="" class="server-header-table">
+                  <tr data-v-78885a38="">
+                    <td data-v-78885a38="">
+                      <span
+                        data-v-78885a38=""
+                        class="z-font-size-14 z-color-333"
+                        >我的云主机</span
+                      >
+                    </td>
+                    <td data-v-78885a38="">&nbsp;&nbsp;&nbsp;</td>
+                    <td data-v-78885a38="">
+                      <span
+                        data-v-78885a38=""
+                        class="z-color-green-state state-icon server-state-run"
+                        >运行-running</span
+                      >
+                      <!---->
+                      <!---->
+                      （正常）
+                    </td>
+                  </tr>
+                  <tr data-v-78885a38="">
+                    <td data-v-78885a38="">IP：103.217.186.75</td>
+                    <td data-v-78885a38="">&nbsp;&nbsp;&nbsp;</td>
+                    <td data-v-78885a38="" class="z-textAlign-right">
+                      到期时间：
+                      <span data-v-78885a38="">2026-08-28 09:38:24</span>
+                      <!---->
+                    </td>
+                  </tr>
+                </table>
+                <!---->
+                <button
+                  data-v-78885a38=""
+                  disabled="disabled"
+                  type="button"
+                  class="el-button el-button--primary el-button--small is-disabled"
+                  style="margin-left: 120px"
+                >
+                  <!----><!----><span>启动</span>
+                </button>
+                <button
+                  data-v-78885a38=""
+                  type="button"
+                  class="el-button el-button--primary el-button--small"
+                >
+                  <!----><!----><span>重启</span>
+                </button>
+                <!---->
+                <button
+                  data-v-78885a38=""
+                  type="button"
+                  class="el-button el-button--primary el-button--small"
+                >
+                  <!----><!----><span>关机</span>
+                </button>
+                <!---->
+                <button
+                  data-v-78885a38=""
+                  type="button"
+                  class="el-button el-button--primary el-button--small"
+                >
+                  <!----><!----><span>VNC连接</span>
+                </button>
+                <button
+                  data-v-78885a38=""
+                  type="button"
+                  class="el-button el-button--primary el-button--small"
+                >
+                  <!----><!----><span>免费延期</span>
+                </button>
+                <!---->
+                <div
+                  data-v-78885a38=""
+                  class="alert-deng z-display-inlineBlock z-margin-left-10-precent"
+                  style="width: 266px"
+                >
+                  云服务器绑定域名需提交域名白名单
+                  <a data-v-78885a38="" href="#/fuwu5" class="z-color-a"
+                    >&gt;提交白名单</a
+                  >
+                </div>
+                <div class="el-loading-mask" style="display: none">
+                  <div class="el-loading-spinner">
+                    <svg viewBox="25 25 50 50" class="circular">
+                      <circle
+                        cx="50"
+                        cy="50"
+                        r="20"
+                        fill="none"
+                        class="path"
+                      ></circle></svg
+                    ><!---->
+                  </div>
+                </div>
+              </div>
+              <div
+                data-v-78885a38=""
+                class="el-tabs el-tabs--top el-tabs--border-card"
+              >
+                <div class="el-tabs__header is-top">
+                  <div class="el-tabs__nav-wrap is-top">
+                    <div class="el-tabs__nav-scroll">
+                      <div
+                        role="tablist"
+                        class="el-tabs__nav is-top"
+                        style="transform: translateX(0px)"
+                      >
+                        <div
+                          id="tab-first"
+                          aria-controls="pane-first"
+                          role="tab"
+                          tabindex="0"
+                          class="el-tabs__item is-top is-active"
+                          aria-selected="true"
+                        >
+                          基本信息
+                        </div>
+                        <div
+                          id="tab-second"
+                          aria-controls="pane-second"
+                          role="tab"
+                          tabindex="-1"
+                          class="el-tabs__item is-top"
+                        >
+                          安装操作系统
+                        </div>
+                        <div
+                          id="tab-reset-password"
+                          aria-controls="pane-reset-password"
+                          role="tab"
+                          tabindex="-1"
+                          class="el-tabs__item is-top"
+                        >
+                          重设密码
+                        </div>
+                        <div
+                          id="tab-third"
+                          aria-controls="pane-third"
+                          role="tab"
+                          tabindex="-1"
+                          class="el-tabs__item is-top"
+                        >
+                          快照管理
+                        </div>
+                        <div
+                          id="tab-fourth"
+                          aria-controls="pane-fourth"
+                          role="tab"
+                          tabindex="-1"
+                          class="el-tabs__item is-top"
+                        >
+                          流量统计
+                        </div>
+                        <div
+                          id="tab-five"
+                          aria-controls="pane-five"
+                          role="tab"
+                          tabindex="-1"
+                          class="el-tabs__item is-top"
+                        >
+                          cpu使用统计
+                        </div>
+                        <div
+                          id="tab-six"
+                          aria-controls="pane-six"
+                          role="tab"
+                          tabindex="-1"
+                          class="el-tabs__item is-top"
+                        >
+                          磁盘使用统计
+                        </div>
+                        <div
+                          id="tab-seven"
+                          aria-controls="pane-seven"
+                          role="tab"
+                          tabindex="-1"
+                          class="el-tabs__item is-top"
+                        >
+                          免费延期
+                        </div>
+                        <div
+                          id="tab-eight"
+                          aria-controls="pane-eight"
+                          role="tab"
+                          tabindex="-1"
+                          class="el-tabs__item is-top"
+                        >
+                          延期记录
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="el-tabs__content">
+                  <div
+                    data-v-78885a38=""
+                    role="tabpanel"
+                    id="pane-first"
+                    aria-labelledby="tab-first"
+                    class="el-tab-pane"
+                    style=""
+                  >
+                    <div data-v-78885a38="" class="el-row">
+                      <div data-v-78885a38="" class="el-col el-col-24">
+                        <div data-v-78885a38="" class="row-title">基本信息</div>
+                      </div>
+                    </div>
+                    <div data-v-78885a38="" class="el-row">
+                      <div data-v-78885a38="" class="el-col el-col-16">
+                        <div
+                          data-v-78885a38=""
+                          class="row-border el-row is-align-middle el-row--flex"
+                        >
+                          <div
+                            data-v-78885a38=""
+                            class="el-col el-col-24 el-col-sm-6 el-col-md-5 el-col-lg-4"
+                          >
+                            <div
+                              data-v-78885a38=""
+                              class="grid-content z-padding-left-30-precent z-color-muted"
+                            >
+                              名称 :
+                            </div>
+                          </div>
+                          <div
+                            data-v-78885a38=""
+                            class="el-col el-col-24 el-col-sm-6 el-col-md-7 el-col-lg-8 el-col-lg-pull-1"
+                          >
+                            <div
+                              data-v-78885a38=""
+                              class="grid-content z-padding-left-20-precent change-name"
+                            >
+                              我的云主机
+                              <span
+                                data-v-78885a38=""
+                                title="修改名称"
+                                class="edit-name"
+                              ></span>
+                            </div>
+                          </div>
+                          <div
+                            data-v-78885a38=""
+                            class="el-col el-col-24 el-col-sm-6 el-col-md-5 el-col-lg-4"
+                          >
+                            <div
+                              data-v-78885a38=""
+                              class="grid-content z-padding-left-30-precent z-color-muted"
+                            >
+                              备注 :
+                            </div>
+                          </div>
+                          <div
+                            data-v-78885a38=""
+                            class="el-col el-col-24 el-col-sm-6 el-col-md-7 el-col-lg-8 el-col-lg-pull-1"
+                          >
+                            <div
+                              data-v-78885a38=""
+                              class="grid-content z-padding-left-20-precent change-name"
+                            >
+                              备注
+                              <span
+                                data-v-78885a38=""
+                                title="修改备注"
+                                class="edit-name"
+                              ></span>
+                            </div>
+                          </div>
+                        </div>
+                        <div
+                          data-v-78885a38=""
+                          class="row-border el-row is-align-middle el-row--flex"
+                        >
+                          <div
+                            data-v-78885a38=""
+                            class="el-col el-col-24 el-col-sm-6 el-col-md-5 el-col-lg-4"
+                          >
+                            <div
+                              data-v-78885a38=""
+                              class="grid-content z-padding-left-30-precent z-color-muted"
+                            >
+                              公网IP :
+                            </div>
+                          </div>
+                          <div
+                            data-v-78885a38=""
+                            class="el-col el-col-24 el-col-sm-6 el-col-md-7 el-col-lg-8 el-col-lg-pull-1"
+                          >
+                            <div
+                              data-v-78885a38=""
+                              class="grid-content z-padding-left-20-precent"
+                            >
+                              103.217.186.75
+                            </div>
+                          </div>
+                          <div
+                            data-v-78885a38=""
+                            class="el-col el-col-24 el-col-sm-6 el-col-md-5 el-col-lg-4"
+                          >
+                            <div
+                              data-v-78885a38=""
+                              class="grid-content z-padding-left-30-precent z-color-muted"
+                            >
+                              网络类型 :
+                            </div>
+                          </div>
+                          <div
+                            data-v-78885a38=""
+                            class="el-col el-col-24 el-col-sm-6 el-col-md-7 el-col-lg-8 el-col-lg-pull-1"
+                          >
+                            <div
+                              data-v-78885a38=""
+                              class="grid-content z-padding-left-20-precent"
+                            >
+                              电信高防（ 防御200G ）
+                            </div>
+                          </div>
+                        </div>
+                        <div
+                          data-v-78885a38=""
+                          class="row-border el-row is-align-middle el-row--flex"
+                        >
+                          <div
+                            data-v-78885a38=""
+                            class="el-col el-col-24 el-col-sm-6 el-col-md-5 el-col-lg-4"
+                          >
+                            <div
+                              data-v-78885a38=""
+                              class="grid-content z-padding-left-30-precent z-color-muted"
+                            >
+                              运行时间 :
+                            </div>
+                          </div>
+                          <div
+                            data-v-78885a38=""
+                            class="el-col el-col-24 el-col-sm-6 el-col-md-7 el-col-lg-8 el-col-lg-pull-1"
+                          >
+                            <div
+                              data-v-78885a38=""
+                              class="grid-content z-padding-left-20-precent"
+                            >
+                              4:33:2
+                            </div>
+                          </div>
+                          <div
+                            data-v-78885a38=""
+                            class="el-col el-col-24 el-col-sm-6 el-col-md-5 el-col-lg-4"
+                          >
+                            <div
+                              data-v-78885a38=""
+                              class="grid-content z-padding-left-30-precent z-color-muted"
+                            >
+                              操作系统 :
+                            </div>
+                          </div>
+                          <div
+                            data-v-78885a38=""
+                            class="el-col el-col-24 el-col-sm-6 el-col-md-7 el-col-lg-8 el-col-lg-pull-1"
+                          >
+                            <div
+                              data-v-78885a38=""
+                              class="grid-content z-padding-left-20-precent"
+                            >
+                              宝塔面板 CentOS 7.6 x86_64 (64bit)
+                            </div>
+                          </div>
+                        </div>
+                        <div
+                          data-v-78885a38=""
+                          class="row-border el-row is-align-middle el-row--flex"
+                        >
+                          <div
+                            data-v-78885a38=""
+                            class="el-col el-col-24 el-col-sm-6 el-col-md-5 el-col-lg-4"
+                          >
+                            <div
+                              data-v-78885a38=""
+                              class="grid-content z-padding-left-30-precent z-color-muted"
+                            >
+                              创建时间 :
+                            </div>
+                          </div>
+                          <div
+                            data-v-78885a38=""
+                            class="el-col el-col-24 el-col-sm-6 el-col-md-7 el-col-lg-8 el-col-lg-pull-1"
+                          >
+                            <div
+                              data-v-78885a38=""
+                              class="grid-content z-padding-left-20-precent"
+                            >
+                              2026-08-27 09:38:24
+                            </div>
+                          </div>
+                          <div
+                            data-v-78885a38=""
+                            class="el-col el-col-24 el-col-sm-6 el-col-md-5 el-col-lg-4"
+                          >
+                            <div
+                              data-v-78885a38=""
+                              class="grid-content z-padding-left-30-precent z-color-muted"
+                            >
+                              到期时间 :
+                            </div>
+                          </div>
+                          <div
+                            data-v-78885a38=""
+                            class="el-col el-col-24 el-col-sm-6 el-col-md-7 el-col-lg-8 el-col-lg-pull-1"
+                          >
+                            <div
+                              data-v-78885a38=""
+                              class="grid-content z-padding-left-20-precent"
+                            >
+                              2026-08-28 09:38:24
+                              <button
+                                data-v-78885a38=""
+                                type="button"
+                                class="el-button z-margin-left-10-precent el-button--primary el-button--small"
+                              >
+                                <!----><!----><span>免费延期</span>
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                        <div
+                          data-v-78885a38=""
+                          class="row-border el-row is-align-middle el-row--flex"
+                        >
+                          <div
+                            data-v-78885a38=""
+                            class="el-col el-col-24 el-col-sm-6 el-col-md-5 el-col-lg-4"
+                          >
+                            <div
+                              data-v-78885a38=""
+                              class="grid-content z-padding-left-30-precent z-color-muted"
+                            >
+                              配置信息 :
+                            </div>
+                          </div>
+                          <div
+                            data-v-78885a38=""
+                            class="el-col el-col-24 el-col-sm-18 el-col-md-19 el-col-lg-20 el-col-lg-pull-1"
+                          >
+                            <div
+                              data-v-78885a38=""
+                              class="grid-content-small z-padding-left-20-precent"
+                            >
+                              <div data-v-78885a38="" class="el-row">
+                                <div
+                                  data-v-78885a38=""
+                                  class="z-color-666 el-col el-col-8"
+                                >
+                                  CPU：<span
+                                    data-v-78885a38=""
+                                    class="z-color-green z-font-weight-700"
+                                    >1核</span
+                                  >
+                                </div>
+                                <div
+                                  data-v-78885a38=""
+                                  class="z-color-666 el-col el-col-8"
+                                >
+                                  公网带宽：<span
+                                    data-v-78885a38=""
+                                    class="z-color-green z-font-weight-700"
+                                    >5M</span
+                                  >
+                                </div>
+                              </div>
+                              <div data-v-78885a38="" class="el-row">
+                                <div
+                                  data-v-78885a38=""
+                                  class="z-color-666 el-col el-col-8"
+                                >
+                                  内存：<span
+                                    data-v-78885a38=""
+                                    class="z-color-green z-font-weight-700"
+                                    >1G</span
+                                  >
+                                </div>
+                                <div
+                                  data-v-78885a38=""
+                                  class="z-color-666 el-col el-col-8"
+                                >
+                                  SSD数据盘：<span
+                                    data-v-78885a38=""
+                                    class="z-color-green z-font-weight-700"
+                                    >10G</span
+                                  >
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <div data-v-78885a38="" class="el-col el-col-8">
+                        <div
+                          data-v-78885a38=""
+                          element-loading-text="图片加载中"
+                          element-loading-spinner="el-icon-loading"
+                          element-loading-background="rgba(255, 255, 255, 0.9)"
+                          class="z-margin-all-15-precent"
+                          style="width: 320px; height: 250px; margin-top: 1rem"
+                        >
+                          <img
+                            data-v-78885a38=""
+                            src="data:image/jpeg;base64,iVBORw0KGgoAAAANSUhEUgAAAUAAAADwCAYAAABxLb1rAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAMzSURBVHhe7chRDQIBEMXAtYY9hGHrQEAV8OZj0qR3r3vu/XnufgXYkhNgQU6ABTkBFuQEWJATYEFOgAU5ARbkBFiQE2BBToAFOQEW5ARYkBNgQU6ABTkBFuQEWJATYEFOgAU5ARbkBFiQE2BBToAFOQEW5ARYkBNgQU6ABTkBFuQEWJATYEFOgAU5ARbkBFiQE2BBToAFOQEW5ARYkBNgQU6ABTkBFuQEWJATYEFOgAU5ARbkBFiQE2BBToAFOQEW5ARYkBNgQU6ABTkBFuQEWJATYEFOgAU5ARbkBFiQE2BBToAFOQEW5ARYkBNgQU6ABTkBFuQEWJATYEFOgAU5ARbkBFiQE2BBToAFOQEW5ARYkBNgQU6ABTkBFuQEWJATYEFOgAU5ARbkBFiQE2BBToAFOQEW5ARYkBNgQU6ABTkBFuQEWJATYEFOgAU5ARbkBFiQE2BBToAFOQEW5ARYkBNgQU6ABTkBFuQEWJATYEFOgAU5ARbkBFiQE2BBToAFOQEW5ARYkBNgQU6ABTkBFuQEWJATYEFOgAU5ARbkBFiQE2BBToAFOQEW5ARYkBNgQU6ABTkBFuQEWJATYEFOgAU5ARbkBFiQE2BBToAFOQEW5ARYkBNgQU6ABTkBFuQEWJATYEFOgAU5ARbkBFiQE2BBToAFOQEW5ARYkBNgQU6ABTkBFuQEWJATYEFOgAU5ARbkBFiQE2BBToAFOQEW5ARYkBNgQU6ABTkBFuQEWJATYEFOgAU5ARbkBFiQE2BBToAFOQEW5ARYkBNgQU6ABTkBFuQEWJATYEFOgAU5ARbkBFiQE2BBToAFOQEW5ARYkBNgQU6ABTkBFuQEWJATYEFOgAU5ARbkBFiQE2BBToAFOQEW5ARYkBNgQU6ABTkBFuQEWJATYEFOgAU5ARbkBFiQE2BBToAFOQEW5ARYkBNgQU6ABTkBFuQEWJATYEFOgAU5ARbkBFiQE2BBToAFOQEW5ARYkBNgQU6ABTkBFuQEWJATYEFOgAU5ARbkBFiQE2BBToAFOQEW5ARYkBNgQU6ABTkBFuQEWJATYEFOgAU5ARbkBFiQE2BBToAFOQH+3D1fkGPnCGUxIcQAAAAASUVORK5CYII="
+                            alt=""
+                          />
+                          <p
+                            data-v-78885a38=""
+                            class="z-textAlign-center z-font-size-18 z-lineHeight-30"
+                          >
+                            服务器当前屏幕状态
+                          </p>
+                          <div
+                            class="el-loading-mask"
+                            style="
+                              background-color: rgba(255, 255, 255, 0.9);
+                              display: none;
+                            "
+                          >
+                            <div class="el-loading-spinner">
+                              <i class="el-icon-loading"></i>
+                              <p class="el-loading-text">图片加载中</p>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div
+                    data-v-78885a38=""
+                    role="tabpanel"
+                    aria-hidden="true"
+                    id="pane-second"
+                    aria-labelledby="tab-second"
+                    class="el-tab-pane"
+                    style="display: none"
+                  >
+                    <div data-v-78885a38="" class="alert-warn">
+                      安装操作系统需要的时间，根据系统类型不同，大约在3-5分钟内安装完毕。
+                    </div>
+                    <div data-v-78885a38="" class="el-row">
+                      <div data-v-78885a38="" class="el-col el-col-24">
+                        <div data-v-78885a38="" class="row-title">
+                          安装操作系统
+                        </div>
+                      </div>
+                    </div>
+                    <div
+                      data-v-78885a38=""
+                      class="row-border el-row is-align-middle el-row--flex"
+                    >
+                      <div
+                        data-v-78885a38=""
+                        class="el-col el-col-24 el-col-sm-6 el-col-md-4 el-col-lg-4"
+                      >
+                        <div
+                          data-v-78885a38=""
+                          class="grid-content z-padding-left-30-precent z-color-muted"
+                        >
+                          宝塔面板说明 :
+                        </div>
+                        <a
+                          data-v-78885a38=""
+                          href="/help/content_1081.html"
+                          target="_blank"
+                          class="grid-content z-padding-left-30-precent z-color-a a-underline-link"
+                          >宝塔面板介绍</a
+                        >
+                      </div>
+                      <div
+                        data-v-78885a38=""
+                        class="el-col el-col-24 el-col-sm-18 el-col-md-20 el-col-lg-20 el-col-lg-pull-1"
+                      >
+                        <div
+                          data-v-78885a38=""
+                          class="grid-content-small z-padding-left-20-precent change-name"
+                        >
+                          <p data-v-78885a38="">
+                            内置宝塔面板的系统，安装完毕后，您可以通过访问以下地址来进行初始化服务器。
+                          </p>
+                          <p data-v-78885a38="">
+                            Windows用户：<a
+                              data-v-78885a38=""
+                              href="http://103.217.186.75:888"
+                              target="_blank"
+                              class="z-color-a a-underline-link"
+                              >http://103.217.186.75:888</a
+                            >
+                          </p>
+                          <p data-v-78885a38="">
+                            Linux用户：<a
+                              data-v-78885a38=""
+                              href="http://103.217.186.75:8888"
+                              target="_blank"
+                              class="z-color-a a-underline-link"
+                              >http://103.217.186.75:8888</a
+                            >
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                    <div
+                      data-v-78885a38=""
+                      class="row-border el-row is-align-middle el-row--flex"
+                    >
+                      <div
+                        data-v-78885a38=""
+                        class="el-col el-col-24 el-col-sm-6 el-col-md-4 el-col-lg-4"
+                      >
+                        <div
+                          data-v-78885a38=""
+                          class="grid-content z-padding-left-30-precent z-color-muted"
+                        >
+                          选择操作系统类型 :
+                        </div>
+                      </div>
+                      <div
+                        data-v-78885a38=""
+                        class="el-col el-col-24 el-col-sm-18 el-col-md-20 el-col-lg-20 el-col-lg-pull-1"
+                      >
+                        <div
+                          data-v-78885a38=""
+                          class="grid-content z-padding-left-20-precent"
+                        >
+                          <div
+                            data-v-78885a38=""
+                            class="el-select z-margin-right-5-precent el-select--small"
+                          >
+                            <!---->
+                            <div
+                              class="el-input el-input--small el-input--suffix"
+                            >
+                              <!----><input
+                                type="text"
+                                readonly="readonly"
+                                autocomplete="off"
+                                placeholder="请选择"
+                                class="el-input__inner"
+                              /><!----><span class="el-input__suffix"
+                                ><span class="el-input__suffix-inner"
+                                  ><i
+                                    class="el-select__caret el-input__icon el-icon-arrow-up"
+                                  ></i
+                                  ><!----><!----></span
+                                ><!----></span
+                              ><!---->
+                            </div>
+                            <div
+                              class="el-select-dropdown el-popper"
+                              style="display: none"
+                            >
+                              <div class="el-scrollbar" style="display: none">
+                                <div
+                                  class="el-select-dropdown__wrap el-scrollbar__wrap"
+                                  style="
+                                    margin-bottom: -15px;
+                                    margin-right: -15px;
+                                  "
+                                >
+                                  <ul
+                                    class="el-scrollbar__view el-select-dropdown__list"
+                                  ></ul>
+                                </div>
+                                <div class="el-scrollbar__bar is-horizontal">
+                                  <div
+                                    class="el-scrollbar__thumb"
+                                    style="transform: translateX(0%)"
+                                  ></div>
+                                </div>
+                                <div class="el-scrollbar__bar is-vertical">
+                                  <div
+                                    class="el-scrollbar__thumb"
+                                    style="transform: translateY(0%)"
+                                  ></div>
+                                </div>
+                              </div>
+                              <p class="el-select-dropdown__empty">无数据</p>
+                            </div>
+                          </div>
+                          <div
+                            data-v-78885a38=""
+                            class="el-select el-select--small"
+                            style="width: 350px"
+                          >
+                            <!---->
+                            <div
+                              class="el-input el-input--small el-input--suffix"
+                            >
+                              <!----><input
+                                type="text"
+                                readonly="readonly"
+                                autocomplete="off"
+                                placeholder="请选择"
+                                class="el-input__inner"
+                              /><!----><span class="el-input__suffix"
+                                ><span class="el-input__suffix-inner"
+                                  ><i
+                                    class="el-select__caret el-input__icon el-icon-arrow-up"
+                                  ></i
+                                  ><!----><!----></span
+                                ><!----></span
+                              ><!---->
+                            </div>
+                            <div
+                              class="el-select-dropdown el-popper"
+                              style="display: none"
+                            >
+                              <div class="el-scrollbar" style="display: none">
+                                <div
+                                  class="el-select-dropdown__wrap el-scrollbar__wrap"
+                                  style="
+                                    margin-bottom: -15px;
+                                    margin-right: -15px;
+                                  "
+                                >
+                                  <ul
+                                    class="el-scrollbar__view el-select-dropdown__list"
+                                  ></ul>
+                                </div>
+                                <div class="el-scrollbar__bar is-horizontal">
+                                  <div
+                                    class="el-scrollbar__thumb"
+                                    style="transform: translateX(0%)"
+                                  ></div>
+                                </div>
+                                <div class="el-scrollbar__bar is-vertical">
+                                  <div
+                                    class="el-scrollbar__thumb"
+                                    style="transform: translateY(0%)"
+                                  ></div>
+                                </div>
+                              </div>
+                              <p class="el-select-dropdown__empty">无数据</p>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div
+                      data-v-78885a38=""
+                      class="row-border el-row is-align-middle el-row--flex"
+                    >
+                      <div
+                        data-v-78885a38=""
+                        class="el-col el-col-24 el-col-sm-6 el-col-md-4 el-col-lg-4"
+                      >
+                        <div
+                          data-v-78885a38=""
+                          class="grid-content z-padding-left-30-precent z-color-muted"
+                        >
+                          操作系统密码 :
+                        </div>
+                      </div>
+                      <div
+                        data-v-78885a38=""
+                        class="el-col el-col-24 el-col-sm-18 el-col-md-20 el-col-lg-20 el-col-lg-pull-1"
+                      >
+                        <div
+                          data-v-78885a38=""
+                          class="grid-content-small z-padding-left-20-precent"
+                        >
+                          <form data-v-78885a38="" class="el-form psd-form">
+                            <div
+                              data-v-78885a38=""
+                              class="el-form-item is-required el-form-item--small"
+                              style="margin-top: 10px; margin-bottom: 10px"
+                            >
+                              <!---->
+                              <div
+                                class="el-form-item__content"
+                                style="margin-left: 0px"
+                              >
+                                <div
+                                  data-v-78885a38=""
+                                  class="el-input el-input--small"
+                                  style="width: 280px"
+                                >
+                                  <!----><input
+                                    type="password"
+                                    autocomplete="off"
+                                    class="el-input__inner"
+                                  /><!----><!----><!---->
+                                </div>
+                                <!---->
+                              </div>
+                            </div>
+                            <div
+                              data-v-78885a38=""
+                              class="el-form-item el-form-item--small"
+                              style="margin-bottom: 0px"
+                            >
+                              <!---->
+                              <div
+                                class="el-form-item__content"
+                                style="margin-left: 0px"
+                              >
+                                <span
+                                  data-v-78885a38=""
+                                  class="z-color-red z-font-size-12"
+                                  >请输入8~32位密码(必须包含大写字母小写字母和数字)</span
+                                ><!---->
+                              </div>
+                            </div>
+                          </form>
+                        </div>
+                      </div>
+                    </div>
+                    <div
+                      data-v-78885a38=""
+                      class="row-border el-row is-align-middle el-row--flex"
+                    >
+                      <div
+                        data-v-78885a38=""
+                        class="el-col el-col-24 el-col-sm-6 el-col-md-4 el-col-lg-4"
+                      >
+                        <div
+                          data-v-78885a38=""
+                          class="grid-content z-padding-left-30-precent z-color-muted"
+                        >
+                          安装方式 :
+                        </div>
+                      </div>
+                      <div
+                        data-v-78885a38=""
+                        class="el-col el-col-24 el-col-sm-18 el-col-md-20 el-col-lg-20 el-col-lg-pull-1"
+                      >
+                        <div
+                          data-v-78885a38=""
+                          class="grid-content-small z-padding-left-20-precent"
+                        >
+                          <div
+                            data-v-78885a38=""
+                            class="z-margin-bottom-5-precent"
+                          >
+                            <label
+                              data-v-78885a38=""
+                              role="radio"
+                              aria-checked="true"
+                              tabindex="0"
+                              class="el-radio z-margin-right-20-precent is-checked"
+                              ><span class="el-radio__input is-checked"
+                                ><span class="el-radio__inner"></span
+                                ><input
+                                  type="radio"
+                                  aria-hidden="true"
+                                  tabindex="-1"
+                                  class="el-radio__original"
+                                  value="new" /></span
+                              ><span class="el-radio__label"
+                                >全新安装<!----></span
+                              ></label
+                            >
+                            <span
+                              data-v-78885a38=""
+                              class="z-font-size-12 z-color-66-orange"
+                              >（第一次安装请选择这一项）</span
+                            >
+                          </div>
+                          <div
+                            data-v-78885a38=""
+                            class="z-margin-bottom-5-precent"
+                          >
+                            <label
+                              data-v-78885a38=""
+                              role="radio"
+                              tabindex="0"
+                              class="el-radio z-margin-right-20-precent"
+                              ><span class="el-radio__input"
+                                ><span class="el-radio__inner"></span
+                                ><input
+                                  type="radio"
+                                  aria-hidden="true"
+                                  tabindex="-1"
+                                  class="el-radio__original"
+                                  value="cpan" /></span
+                              ><span class="el-radio__label"
+                                >只安装系统盘<!----></span
+                              ></label
+                            >
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div
+                      data-v-78885a38=""
+                      class="row-border el-row is-align-middle el-row--flex"
+                    >
+                      <div
+                        data-v-78885a38=""
+                        class="el-col el-col-24 el-col-sm-6 el-col-md-4 el-col-lg-4"
+                      >
+                        <div
+                          data-v-78885a38=""
+                          class="grid-content z-padding-left-30-precent z-color-muted"
+                        ></div>
+                      </div>
+                      <div
+                        data-v-78885a38=""
+                        class="el-col el-col-24 el-col-sm-18 el-col-md-20 el-col-lg-20 el-col-lg-pull-1"
+                      >
+                        <div
+                          data-v-78885a38=""
+                          class="grid-content z-padding-left-20-precent"
+                        >
+                          <span data-v-78885a38="" class="z-font-size-12"
+                            >为保证您的网站安全，请输入验证码：</span
+                          >
+                          <div
+                            data-v-78885a38=""
+                            class="el-input el-input--small"
+                            style="width: 200px"
+                          >
+                            <!----><input
+                              type="text"
+                              autocomplete="off"
+                              class="el-input__inner"
+                            /><!----><!----><!---->
+                          </div>
+                          <img
+                            data-v-78885a38=""
+                            src="https://api.abeiyun.com/www/yzm.php?rnd=0.34514359340771106"
+                            title="点击更换"
+                            class="error-img"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                    <div
+                      data-v-78885a38=""
+                      class="row-border el-row is-align-middle el-row--flex"
+                    >
+                      <div
+                        data-v-78885a38=""
+                        class="el-col el-col-24 el-col-sm-6 el-col-md-4 el-col-lg-4"
+                      >
+                        <div
+                          data-v-78885a38=""
+                          class="grid-content z-padding-left-30-precent z-color-muted"
+                        ></div>
+                      </div>
+                      <div
+                        data-v-78885a38=""
+                        class="el-col el-col-24 el-col-sm-18 el-col-md-20 el-col-lg-20 el-col-lg-pull-1"
+                      >
+                        <div
+                          data-v-78885a38=""
+                          class="grid-content z-padding-left-20-precent"
+                        >
+                          <button
+                            data-v-78885a38=""
+                            type="button"
+                            class="el-button el-button--primary el-button--small"
+                            style="
+                              background-color: rgb(255, 125, 38);
+                              border-color: rgb(255, 111, 15);
+                            "
+                          >
+                            <!----><!----><span>开始安装</span>
+                          </button>
+                          <!---->
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div
+                    data-v-78885a38=""
+                    role="tabpanel"
+                    aria-hidden="true"
+                    id="pane-reset-password"
+                    aria-labelledby="tab-reset-password"
+                    class="el-tab-pane"
+                    style="display: none"
+                  >
+                    <div data-v-78885a38="" class="alert-warn">
+                      <p data-v-78885a38="">
+                        1.Windows系统修改密码后大约30秒左右生效。
+                      </p>
+                      <p data-v-78885a38="">
+                        2.Linux修改密码需要重新启动两次，大约需要3-5分钟生效
+                      </p>
+                    </div>
+                    <div data-v-78885a38="" class="el-row">
+                      <div data-v-78885a38="" class="el-col el-col-24">
+                        <div data-v-78885a38="" class="row-title">修改密码</div>
+                      </div>
+                    </div>
+                    <div
+                      data-v-78885a38=""
+                      class="grid-content z-padding-left-20-precent"
+                    >
+                      <form data-v-78885a38="" class="el-form psd-form">
+                        <div
+                          data-v-78885a38=""
+                          class="el-form-item el-form-item--small"
+                          style="margin-top: 20px"
+                        >
+                          <label
+                            for="name"
+                            class="el-form-item__label"
+                            style="width: 100px"
+                            >用户名：</label
+                          >
+                          <div
+                            class="el-form-item__content"
+                            style="margin-left: 100px"
+                          >
+                            <div
+                              data-v-78885a38=""
+                              class="el-input el-input--small is-disabled"
+                              style="width: 280px"
+                            >
+                              <!----><input
+                                type="text"
+                                disabled="disabled"
+                                autocomplete="off"
+                                class="el-input__inner"
+                              /><!----><!----><!---->
+                            </div>
+                            <!---->
+                          </div>
+                        </div>
+                        <div
+                          data-v-78885a38=""
+                          class="el-form-item is-required el-form-item--small"
+                          style="margin-bottom: 10px"
+                        >
+                          <label
+                            for="password"
+                            class="el-form-item__label"
+                            style="width: 100px"
+                            >输入密码：</label
+                          >
+                          <div
+                            class="el-form-item__content"
+                            style="margin-left: 100px"
+                          >
+                            <div
+                              data-v-78885a38=""
+                              class="el-input el-input--small"
+                              style="width: 280px"
+                            >
+                              <!----><input
+                                type="password"
+                                autocomplete="off"
+                                class="el-input__inner"
+                              /><!----><!----><!---->
+                            </div>
+                            <!---->
+                          </div>
+                        </div>
+                        <div
+                          data-v-78885a38=""
+                          class="el-form-item is-required el-form-item--small"
+                          style="margin-bottom: 10px"
+                        >
+                          <!---->
+                          <div
+                            class="el-form-item__content"
+                            style="margin-left: 100px"
+                          >
+                            <span
+                              data-v-78885a38=""
+                              class="z-color-red z-font-size-12"
+                              >请输入8~32位密码(必须包含大写字母小写字母和数字)</span
+                            ><!---->
+                          </div>
+                        </div>
+                        <div
+                          data-v-78885a38=""
+                          class="el-form-item el-form-item--small"
+                        >
+                          <label
+                            for="checkPass"
+                            class="el-form-item__label"
+                            style="width: 100px"
+                            >确认密码：</label
+                          >
+                          <div
+                            class="el-form-item__content"
+                            style="margin-left: 100px"
+                          >
+                            <div
+                              data-v-78885a38=""
+                              class="el-input el-input--small"
+                              style="width: 280px"
+                            >
+                              <!----><input
+                                type="password"
+                                autocomplete="off"
+                                class="el-input__inner"
+                              /><!----><!----><!---->
+                            </div>
+                            <!---->
+                          </div>
+                        </div>
+                        <div
+                          data-v-78885a38=""
+                          class="el-form-item el-form-item--small"
+                        >
+                          <!---->
+                          <div
+                            class="el-form-item__content"
+                            style="margin-left: 100px"
+                          >
+                            <button
+                              data-v-78885a38=""
+                              type="button"
+                              class="el-button el-button--primary el-button--small"
+                              style="
+                                background-color: rgb(255, 125, 38);
+                                border-color: rgb(255, 111, 15);
+                              "
+                            >
+                              <!----><!----><span>确定</span>
+                            </button>
+                            <!----><!---->
+                          </div>
+                        </div>
+                      </form>
+                    </div>
+                  </div>
+                  <div
+                    data-v-78885a38=""
+                    role="tabpanel"
+                    aria-hidden="true"
+                    id="pane-third"
+                    aria-labelledby="tab-third"
+                    class="el-tab-pane"
+                    style="display: none"
+                  >
+                    <button
+                      data-v-78885a38=""
+                      type="button"
+                      class="el-button el-button--default el-button--mini"
+                      style="display: none"
+                    >
+                      <!----><!----><span>快照列表</span>
+                    </button>
+                    <button
+                      data-v-78885a38=""
+                      type="button"
+                      class="el-button el-button--primary el-button--mini"
+                      style="margin-left: 0px"
+                    >
+                      <!----><!----><span>快照列表</span>
+                    </button>
+                    <button
+                      data-v-78885a38=""
+                      type="button"
+                      class="el-button el-button--default el-button--mini"
+                    >
+                      <!----><!----><span>快照日志</span>
+                    </button>
+                    <button
+                      data-v-78885a38=""
+                      type="button"
+                      class="el-button el-button--primary el-button--mini"
+                      style="display: none"
+                    >
+                      <!----><!----><span>快照日志</span>
+                    </button>
+                    <div
+                      data-v-78885a38=""
+                      class="el-table el-table--fit el-table--border el-table--scrollable-x el-table--enable-row-hover el-table--small"
+                      style="width: 100%; margin-top: 20px"
+                    >
+                      <div class="hidden-columns">
+                        <div data-v-78885a38=""></div>
+                        <div data-v-78885a38=""></div>
+                        <div data-v-78885a38=""></div>
+                        <div data-v-78885a38=""></div>
+                        <div data-v-78885a38=""></div>
+                      </div>
+                      <div class="el-table__header-wrapper">
+                        <table
+                          cellspacing="0"
+                          cellpadding="0"
+                          border="0"
+                          class="el-table__header"
+                          style="width: 400px"
+                        >
+                          <colgroup>
+                            <col name="el-table_1_column_1" width="80" />
+                            <col name="el-table_1_column_2" width="80" />
+                            <col name="el-table_1_column_3" width="80" />
+                            <col name="el-table_1_column_4" width="80" />
+                            <col name="el-table_1_column_5" width="80" />
+                            <col name="gutter" width="0" />
+                          </colgroup>
+                          <thead class="has-gutter">
+                            <tr class="">
+                              <th
+                                colspan="1"
+                                rowspan="1"
+                                class="el-table_1_column_1 is-center is-leaf"
+                              >
+                                <div class="cell">快照类型</div>
+                              </th>
+                              <th
+                                colspan="1"
+                                rowspan="1"
+                                class="el-table_1_column_2 is-center is-leaf"
+                              >
+                                <div class="cell">快照创建状态</div>
+                              </th>
+                              <th
+                                colspan="1"
+                                rowspan="1"
+                                class="el-table_1_column_3 is-center is-leaf"
+                              >
+                                <div class="cell">快照创建时间</div>
+                              </th>
+                              <th
+                                colspan="1"
+                                rowspan="1"
+                                class="el-table_1_column_4 is-center is-leaf"
+                              >
+                                <div class="cell">快照大小</div>
+                              </th>
+                              <th
+                                colspan="1"
+                                rowspan="1"
+                                class="el-table_1_column_5 is-leaf"
+                              >
+                                <div class="cell">操作</div>
+                              </th>
+                              <th
+                                class="gutter"
+                                style="width: 0px; display: none"
+                              ></th>
+                            </tr>
+                          </thead>
+                        </table>
+                      </div>
+                      <div class="el-table__body-wrapper is-scrolling-left">
+                        <table
+                          cellspacing="0"
+                          cellpadding="0"
+                          border="0"
+                          class="el-table__body"
+                          style="width: 400px"
+                        >
+                          <colgroup>
+                            <col name="el-table_1_column_1" width="80" />
+                            <col name="el-table_1_column_2" width="80" />
+                            <col name="el-table_1_column_3" width="80" />
+                            <col name="el-table_1_column_4" width="80" />
+                            <col name="el-table_1_column_5" width="80" />
+                          </colgroup>
+                          <tbody>
+                            <!---->
+                          </tbody>
+                        </table>
+                        <div class="el-table__empty-block" style="width: 400px">
+                          <span class="el-table__empty-text">暂无数据</span>
+                        </div>
+                        <!---->
+                      </div>
+                      <!----><!----><!----><!---->
+                      <div
+                        class="el-table__column-resize-proxy"
+                        style="display: none"
+                      ></div>
+                    </div>
+                    <div
+                      data-v-78885a38=""
+                      class="el-table el-table--fit el-table--border el-table--scrollable-x el-table--enable-row-hover el-table--small"
+                      style="width: 100%; margin-top: 20px; display: none"
+                    >
+                      <div class="hidden-columns">
+                        <div data-v-78885a38=""></div>
+                        <div data-v-78885a38=""></div>
+                      </div>
+                      <div class="el-table__header-wrapper">
+                        <table
+                          cellspacing="0"
+                          cellpadding="0"
+                          border="0"
+                          class="el-table__header"
+                          style="width: 430px"
+                        >
+                          <colgroup>
+                            <col name="el-table_2_column_6" width="350" />
+                            <col name="el-table_2_column_7" width="80" />
+                            <col name="gutter" width="0" />
+                          </colgroup>
+                          <thead class="has-gutter">
+                            <tr class="">
+                              <th
+                                colspan="1"
+                                rowspan="1"
+                                class="el-table_2_column_6 is-center is-leaf"
+                              >
+                                <div class="cell">时间</div>
+                              </th>
+                              <th
+                                colspan="1"
+                                rowspan="1"
+                                class="el-table_2_column_7 is-center is-leaf"
+                              >
+                                <div class="cell">事件</div>
+                              </th>
+                              <th
+                                class="gutter"
+                                style="width: 0px; display: none"
+                              ></th>
+                            </tr>
+                          </thead>
+                        </table>
+                      </div>
+                      <div class="el-table__body-wrapper is-scrolling-left">
+                        <table
+                          cellspacing="0"
+                          cellpadding="0"
+                          border="0"
+                          class="el-table__body"
+                          style="width: 430px"
+                        >
+                          <colgroup>
+                            <col name="el-table_2_column_6" width="350" />
+                            <col name="el-table_2_column_7" width="80" />
+                          </colgroup>
+                          <tbody>
+                            <!---->
+                          </tbody>
+                        </table>
+                        <div class="el-table__empty-block" style="width: 430px">
+                          <span class="el-table__empty-text">暂无数据</span>
+                        </div>
+                        <!---->
+                      </div>
+                      <!----><!----><!----><!---->
+                      <div
+                        class="el-table__column-resize-proxy"
+                        style="display: none"
+                      ></div>
+                    </div>
+                    <div
+                      data-v-78885a38=""
+                      class="el-pagination is-background"
+                      style="display: none"
+                    >
+                      <button
+                        type="button"
+                        disabled="disabled"
+                        class="btn-prev"
+                      >
+                        <i class="el-icon el-icon-arrow-left"></i>
+                      </button>
+                      <ul class="el-pager">
+                        <!----><!----><!----><!---->
+                      </ul>
+                      <button
+                        type="button"
+                        disabled="disabled"
+                        class="btn-next"
+                      >
+                        <i class="el-icon el-icon-arrow-right"></i>
+                      </button>
+                    </div>
+                  </div>
+                  <div
+                    data-v-78885a38=""
+                    role="tabpanel"
+                    aria-hidden="true"
+                    id="pane-fourth"
+                    aria-labelledby="tab-fourth"
+                    class="el-tab-pane"
+                    style="display: none"
+                  >
+                    <div data-v-78885a38="" class="z-margin-bottom-15-precent">
+                      当前IP：(103.217.186.75)
+                    </div>
+                    <div
+                      data-v-78885a38=""
+                      class="server-monitor-content clearfix list"
+                    >
+                      <div data-v-78885a38="" class="server-monitor-box">
+                        <div data-v-78885a38="" class="server-monitor-btn">
+                          <button
+                            data-v-78885a38=""
+                            type="button"
+                            class="el-button el-button--default el-button--mini"
+                            style="margin-left: 10px; display: none"
+                          >
+                            <!----><!----><span>平均</span>
+                          </button>
+                          <button
+                            data-v-78885a38=""
+                            type="button"
+                            class="el-button el-button--primary el-button--mini"
+                          >
+                            <!----><!----><span>平均</span>
+                          </button>
+                          <button
+                            data-v-78885a38=""
+                            type="button"
+                            class="el-button el-button--default el-button--mini"
+                            style="margin-left: 10px"
+                          >
+                            <!----><!----><span>最大</span>
+                          </button>
+                          <button
+                            data-v-78885a38=""
+                            type="button"
+                            class="el-button el-button--primary el-button--mini"
+                            style="display: none"
+                          >
+                            <!----><!----><span>最大</span>
+                          </button>
+                        </div>
+                        <div
+                          data-v-78885a38=""
+                          id="netMinu"
+                          class="charts-container"
+                        ></div>
+                      </div>
+                      <div data-v-78885a38="" class="server-monitor-box">
+                        <div data-v-78885a38="" class="server-monitor-btn">
+                          <button
+                            data-v-78885a38=""
+                            type="button"
+                            class="el-button el-button--default el-button--mini"
+                            style="margin-left: 10px; display: none"
+                          >
+                            <!----><!----><span>平均</span>
+                          </button>
+                          <button
+                            data-v-78885a38=""
+                            type="button"
+                            class="el-button el-button--primary el-button--mini"
+                          >
+                            <!----><!----><span>平均</span>
+                          </button>
+                          <button
+                            data-v-78885a38=""
+                            type="button"
+                            class="el-button el-button--default el-button--mini"
+                            style="margin-left: 10px"
+                          >
+                            <!----><!----><span>最大</span>
+                          </button>
+                          <button
+                            data-v-78885a38=""
+                            type="button"
+                            class="el-button el-button--primary el-button--mini"
+                            style="display: none"
+                          >
+                            <!----><!----><span>最大</span>
+                          </button>
+                        </div>
+                        <div
+                          data-v-78885a38=""
+                          id="netHour"
+                          class="charts-container"
+                        ></div>
+                      </div>
+                      <div data-v-78885a38="" class="server-monitor-box">
+                        <div data-v-78885a38="" class="server-monitor-btn">
+                          <button
+                            data-v-78885a38=""
+                            type="button"
+                            class="el-button el-button--default el-button--mini"
+                            style="margin-left: 10px; display: none"
+                          >
+                            <!----><!----><span>平均</span>
+                          </button>
+                          <button
+                            data-v-78885a38=""
+                            type="button"
+                            class="el-button el-button--primary el-button--mini"
+                          >
+                            <!----><!----><span>平均</span>
+                          </button>
+                          <button
+                            data-v-78885a38=""
+                            type="button"
+                            class="el-button el-button--default el-button--mini"
+                            style="margin-left: 10px"
+                          >
+                            <!----><!----><span>最大</span>
+                          </button>
+                          <button
+                            data-v-78885a38=""
+                            type="button"
+                            class="el-button el-button--primary el-button--mini"
+                            style="display: none"
+                          >
+                            <!----><!----><span>最大</span>
+                          </button>
+                        </div>
+                        <div
+                          data-v-78885a38=""
+                          id="netDay"
+                          class="charts-container"
+                        ></div>
+                      </div>
+                      <div data-v-78885a38="" class="server-monitor-box">
+                        <div data-v-78885a38="" class="server-monitor-btn">
+                          <button
+                            data-v-78885a38=""
+                            type="button"
+                            class="el-button el-button--default el-button--mini"
+                            style="margin-left: 10px; display: none"
+                          >
+                            <!----><!----><span>平均</span>
+                          </button>
+                          <button
+                            data-v-78885a38=""
+                            type="button"
+                            class="el-button el-button--primary el-button--mini"
+                          >
+                            <!----><!----><span>平均</span>
+                          </button>
+                          <button
+                            data-v-78885a38=""
+                            type="button"
+                            class="el-button el-button--default el-button--mini"
+                            style="margin-left: 10px"
+                          >
+                            <!----><!----><span>最大</span>
+                          </button>
+                          <button
+                            data-v-78885a38=""
+                            type="button"
+                            class="el-button el-button--primary el-button--mini"
+                            style="display: none"
+                          >
+                            <!----><!----><span>最大</span>
+                          </button>
+                        </div>
+                        <div
+                          data-v-78885a38=""
+                          id="netMonth"
+                          class="charts-container"
+                        ></div>
+                      </div>
+                    </div>
+                  </div>
+                  <div
+                    data-v-78885a38=""
+                    role="tabpanel"
+                    aria-hidden="true"
+                    id="pane-five"
+                    aria-labelledby="tab-five"
+                    class="el-tab-pane"
+                    style="display: none"
+                  >
+                    <div data-v-78885a38="" class="z-margin-bottom-15-precent">
+                      当前IP：(103.217.186.75)
+                    </div>
+                    <div
+                      data-v-78885a38=""
+                      class="server-monitor-content clearfix cpu"
+                    >
+                      <div data-v-78885a38="" class="server-monitor-box">
+                        <div
+                          data-v-78885a38=""
+                          id="cpu"
+                          class="charts-container"
+                        ></div>
+                      </div>
+                    </div>
+                  </div>
+                  <div
+                    data-v-78885a38=""
+                    role="tabpanel"
+                    aria-hidden="true"
+                    id="pane-six"
+                    aria-labelledby="tab-six"
+                    class="el-tab-pane"
+                    style="display: none"
+                  >
+                    <div data-v-78885a38="" class="z-margin-bottom-15-precent">
+                      当前IP：(103.217.186.75)
+                    </div>
+                    <div
+                      data-v-78885a38=""
+                      class="server-monitor-content clearfix cpu"
+                    >
+                      <div data-v-78885a38="" class="server-monitor-box">
+                        <div
+                          data-v-78885a38=""
+                          id="iops"
+                          class="charts-container"
+                        ></div>
+                      </div>
+                    </div>
+                  </div>
+                  <div
+                    data-v-78885a38=""
+                    role="tabpanel"
+                    id="pane-seven"
+                    aria-labelledby="tab-seven"
+                    class="el-tab-pane"
+                    style="display: none"
+                    aria-hidden="true"
+                  >
+                    <div data-v-78885a38="" class="alert-info">
+                      1、为了节约系统资源，保留活跃用户，进一步发展免费云服务器，我们采用了定期申请延期的方案，免费产品到期后会自动删除，请及时延期或备份。<br
+                        data-v-78885a38=""
+                      />
+                      2、延期方式：发布使用感受在我们推荐的网站或其他同类的网站中
+                      <a
+                        data-v-78885a38=""
+                        href="/help/content_1155.html"
+                        target="_blank"
+                        class="z-color-a z-curPonit a-underline-link"
+                        >&gt;&gt;查看延期内容要求</a
+                      >
+                      <br data-v-78885a38="" />
+                      3、推荐发帖网站：<a
+                        data-v-78885a38=""
+                        href="http://blog.sina.com.cn/"
+                        target="_blank"
+                        class="z-color-a z-curPonit a-underline-link z-margin-right-5-precent"
+                        >新浪博客</a
+                      ><a
+                        data-v-78885a38=""
+                        href="https://www.toutiao.com//"
+                        target="_blank"
+                        class="z-color-a z-curPonit a-underline-link z-margin-right-5-precent"
+                        >今日头条</a
+                      ><a
+                        data-v-78885a38=""
+                        href="https://blog.csdn.net/"
+                        target="_blank"
+                        class="z-color-a z-curPonit a-underline-link z-margin-right-5-precent"
+                        >CSDN</a
+                      ><a
+                        data-v-78885a38=""
+                        href="https://www.cnblogs.com/"
+                        target="_blank"
+                        class="z-color-a z-curPonit a-underline-link z-margin-right-5-precent"
+                        >博客园</a
+                      ><a
+                        data-v-78885a38=""
+                        href="http://tieba.baidu.com/f?kw=seo%E5%AD%A6%E4%B9%A0"
+                        target="_blank"
+                        class="z-color-a z-curPonit a-underline-link z-margin-right-5-precent"
+                        >百度贴吧</a
+                      ><a
+                        data-v-78885a38=""
+                        href="https://zhidao.baidu.com/search?word=%E6%8A%80%E6%9C%AF"
+                        target="_blank"
+                        class="z-color-a z-curPonit a-underline-link z-margin-right-5-precent"
+                        >百度知道</a
+                      ><a
+                        data-v-78885a38=""
+                        href="http://wenda.so.com/search/?q=%E5%90%BE%E7%88%B1%E7%A0%B4%E8%A7%A3"
+                        target="_blank"
+                        class="z-color-a z-curPonit a-underline-link z-margin-right-5-precent"
+                        >360问答</a
+                      ><a
+                        data-v-78885a38=""
+                        href="https://jingyan.baidu.com/search?word=%E7%BD%91%E7%AB%99%E6%BA%90%E7%A0%81"
+                        target="_blank"
+                        class="z-color-a z-curPonit a-underline-link z-margin-right-5-precent"
+                        >百度经验</a
+                      ><a
+                        data-v-78885a38=""
+                        href="http://wenda.tianya.cn/search.jsp?q=%E8%99%9A%E6%8B%9F%E4%B8%BB%E6%9C%BA%E8%AE%BA%E5%9D%9B"
+                        target="_blank"
+                        class="z-color-a z-curPonit a-underline-link z-margin-right-5-precent"
+                        >天涯问答</a
+                      ><a
+                        data-v-78885a38=""
+                        href="https://www.zhihu.com/search?type=content&amp;q=html"
+                        target="_blank"
+                        class="z-color-a z-curPonit a-underline-link z-margin-right-5-precent"
+                        >知乎</a
+                      >
+                      <br data-v-78885a38="" />
+                      4、发表后一小时内把发布截图在下方提交，工作时间三小时审核完成，如删除将会审核失败。
+                    </div>
+                    <div
+                      data-v-78885a38=""
+                      class="alert-deng"
+                      style="width: 228px"
+                    >
+                      每次延期成功可以增加
+                      <span data-v-78885a38="" class="red-chunk">5</span>
+                      天使用时间。
+                    </div>
+                    <form data-v-78885a38="" class="el-form clearfix">
+                      <div
+                        data-v-78885a38=""
+                        class="el-form-item el-form-item--small"
+                      >
+                        <label class="el-form-item__label" style="width: 120px"
+                          >发帖地址：</label
+                        >
+                        <div
+                          class="el-form-item__content"
+                          style="margin-left: 120px"
+                        >
+                          <div
+                            data-v-78885a38=""
+                            class="el-input el-input--small"
+                            style="width: 500px"
+                          >
+                            <!----><input
+                              type="text"
+                              autocomplete="off"
+                              placeholder="请输入发帖网址http://"
+                              class="el-input__inner"
+                            /><!----><!----><!---->
+                          </div>
+                          <!---->
+                        </div>
+                      </div>
+                    </form>
+                    <form
+                      data-v-78885a38=""
+                      class="el-form clearfix el-form--inline"
+                    >
+                      <div
+                        data-v-78885a38=""
+                        class="el-form-item el-form-item--small"
+                      >
+                        <label class="el-form-item__label" style="width: 120px"
+                          >发帖截图：</label
+                        >
+                        <div class="el-form-item__content">
+                          <div data-v-78885a38="" class="ub-box">
+                            <div data-v-78885a38="" class="ub-box">
+                              <div data-v-78885a38="" class="col-img">
+                                <label
+                                  data-v-78885a38=""
+                                  for="fileImg1"
+                                  class="z-curPonit"
+                                  ><img
+                                    data-v-78885a38=""
+                                    src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIYAAABlCAYAAACIqZu9AAAFDklEQVR4nO3de0/iTBgF8NMWCqhcoiTG7//tEGm5VNvptPP+salvwAcoN2cGzy8x2XSrO9qzM89cwGA2m5nJZAKiRpqmCJRSxnZDyD2h7QaQmxgMEjEYJGIwSMRgkIjBIBGDQSIGg0QMBokYDBIxGCRiMEjEYJCIwSARg0EiBoNEDAaJGAwSdWw34N5prTGbzbauPT8/o9/vW2pROwzGjRljUNf1j2uu41DyC4IgsN2EkzEYJGIwSMRgkIjBIBGDcWNS4elDMerMdFVr7cc0LgwRRRGAf9NOrfXB+6XvS2uNsiwPfl63272soRey/trVqqqQJAmUUl4EYzgcYjQaAfh/8epYu3f//liPEYYh3t7eLmvohaz3GGmaIs9z281obfchG2NODvSx+3cXxGywXmMURWG7Cc5xoQaxHgzfSD3Grf8NG6wPJbt6vZ7TG0xxHH//OYoivLy8HHyQVVVhuVxuXRsOhweLSxd6DCeDMRwObTejlSAIMBgMDt5TVRVWq9VWeFwPP+DgUOJCN3pNUiHpw/foXDDIDQwGiRgMEjEYJHJuVnKJPM9RFAW01gjDEHEco9/vf+9t2OJDsbnrLoKhtUaSJD9WUbMsQxRFGI1GeHx8tNK2IAi2gmmMcWKd4hjvg6G1xnw+37vL2WzSGWPw9PT0y60DOp0OXl9ft675EAzva4w0TY9ufQPAcrk8utV9K2EYbn0wGDemlGq9M2uMQZZlN27R/fB6KFFK3fT+XWVZQikFrTWCIECn00Gv1ztY3BpjsF6vtwrQx8dHdDpu/+jdbt0Rp55bqOv6rOKvKAqs12sURfFjhhGGIQaDAYbDofiwjTFYrVZb1/r9PoNxS2F42kh46vhujMFyucRms9l7T13XyLIMX19fGI1GYoEbhuFWiH2oMbwORq/Xu9n9WmssFovWw09d19+F8D38/hevi89ut3t027sRBEHrtQylFN7f38+qSTabDZIkOfnzXON1MABgPB63Gq8nk0mr+4qiwHw+R1VVZ7cpy7IfdYVvvA9Gp9PBdDrde/AliiI8Pz+36i2UUvj4+LjKYdzVaoU8z72oJyRe1xiNJhxFUSDPc1RVhSAIEMcxBoNBqyK1LMurhaKRpimm06mX4biLYDR6vd7JBSnwr3BcLBYXDR8SrfWP856+uKtgnMMYg8VicbPl8q+vr5t83Vvzvsa4VFML0LY/HYzPz0+s12vbzXDSnw2G1hppmtpuhrO8Dsa5J6OMMUiSxInXiLrKu+KzrmtsNhvkeQ5jDKIowsPDAwaDQetpYbMhRvt5FQylFJIk2ZpBlGWJPM8RxzHG4/HR6apSinVFC94MJXmeYz6f751WKqUwn88PHsZphhAfD+f+Ni+CURRFq1XJ5sHv6xHW67W1432+cT4Yzfb3Kf/LpTMUZVlyCDmB08FoeoBzlqrTNN1adVwulxxCTuB08Xnp7CFJEnS73e8CldpzNhjXmD3UdY2Pjw/2FGdwNhhpml7lgbLYPI9zNUYQBMiy7OKj/nQZ53qMsiz5wiAHOBeMZqmb7HJuKGEo3OBcMMgNDAaJGAwSMRgkYjBIxGCQiMGwwIdXplkPhutvtn5tcRw7/6YpgAMrn817SfyFbfE4jjGZTLzoMaz/TjRyk/WhhNzEYJCIwSARg0EiBoNEDAaJGAwSMRgkYjBIxGCQiMEgEYNBIgaDRAwGiRgMEjEYJGIwSMRgkCjk2ybTrjRN8R+0omh4VQOMSgAAAABJRU5ErkJggg=="
+                                    alt="请上传现场图片"
+                                    width="135"
+                                    height="102"
+                                /></label>
+                                <label
+                                  data-v-78885a38=""
+                                  for="fileImg1"
+                                  class="z-curPonit"
+                                  ><img
+                                    data-v-78885a38=""
+                                    src=""
+                                    width="135"
+                                    height="102"
+                                    style="display: none"
+                                /></label>
+                              </div>
+                            </div>
+                            <div
+                              data-v-78885a38=""
+                              class="z-margin-left-15-precent"
+                            >
+                              <p data-v-78885a38="" class="gff8 z-font-size-14">
+                                JPG或PNG格式
+                              </p>
+                              <p
+                                data-v-78885a38=""
+                                class="z-font-size-12 z-color-999 z-padding-bottom-5-precent"
+                              >
+                                请上传发帖截图
+                              </p>
+                              <label
+                                data-v-78885a38=""
+                                for="fileImg1"
+                                class="choose-file"
+                                >选择文件</label
+                              >
+                              <input
+                                data-v-78885a38=""
+                                type="file"
+                                id="fileImg1"
+                                name="CertImg"
+                                class="z-width-30-precent"
+                                style="visibility: hidden"
+                              />
+                            </div>
+                          </div>
+                          <button
+                            data-v-78885a38=""
+                            type="button"
+                            class="el-button z-margin-top-20-precent el-button--primary el-button--small"
+                          >
+                            <!----><!----><span>提交</span></button
+                          ><!---->
+                        </div>
+                      </div>
+                      <!---->
+                      <!---->
+                      <!---->
+                    </form>
+                  </div>
+                  <div
+                    data-v-78885a38=""
+                    role="tabpanel"
+                    aria-hidden="true"
+                    id="pane-eight"
+                    aria-labelledby="tab-eight"
+                    class="el-tab-pane"
+                    style="display: none"
+                  >
+                    <div
+                      data-v-78885a38=""
+                      class="el-table el-table--fit el-table--scrollable-x el-table--enable-row-hover el-table--small"
+                      style="width: 100%"
+                    >
+                      <div class="hidden-columns">
+                        <div data-v-78885a38=""></div>
+                        <div data-v-78885a38=""></div>
+                        <div data-v-78885a38=""></div>
+                        <div data-v-78885a38=""></div>
+                        <div data-v-78885a38=""></div>
+                        <div data-v-78885a38=""></div>
+                      </div>
+                      <div class="el-table__header-wrapper">
+                        <table
+                          cellspacing="0"
+                          cellpadding="0"
+                          border="0"
+                          class="el-table__header"
+                          style="width: 720px"
+                        >
+                          <colgroup>
+                            <col name="el-table_3_column_8" width="80" />
+                            <col name="el-table_3_column_9" width="200" />
+                            <col name="el-table_3_column_10" width="200" />
+                            <col name="el-table_3_column_11" width="80" />
+                            <col name="el-table_3_column_12" width="80" />
+                            <col name="el-table_3_column_13" width="80" />
+                            <col name="gutter" width="0" />
+                          </colgroup>
+                          <thead class="has-gutter">
+                            <tr class="">
+                              <th
+                                colspan="1"
+                                rowspan="1"
+                                class="el-table_3_column_8 is-left is-leaf"
+                              >
+                                <div class="cell">序号</div>
+                              </th>
+                              <th
+                                colspan="1"
+                                rowspan="1"
+                                class="el-table_3_column_9 is-left is-leaf"
+                              >
+                                <div class="cell">发帖截图</div>
+                              </th>
+                              <th
+                                colspan="1"
+                                rowspan="1"
+                                class="el-table_3_column_10 is-left is-leaf"
+                              >
+                                <div class="cell">网址</div>
+                              </th>
+                              <th
+                                colspan="1"
+                                rowspan="1"
+                                class="el-table_3_column_11 is-left is-leaf"
+                              >
+                                <div class="cell">提交时间</div>
+                              </th>
+                              <th
+                                colspan="1"
+                                rowspan="1"
+                                class="el-table_3_column_12 is-left is-leaf"
+                              >
+                                <div class="cell">审核时间</div>
+                              </th>
+                              <th
+                                colspan="1"
+                                rowspan="1"
+                                class="el-table_3_column_13 is-left is-leaf"
+                              >
+                                <div class="cell">状态</div>
+                              </th>
+                              <th
+                                class="gutter"
+                                style="width: 0px; display: none"
+                              ></th>
+                            </tr>
+                          </thead>
+                        </table>
+                      </div>
+                      <div class="el-table__body-wrapper is-scrolling-left">
+                        <table
+                          cellspacing="0"
+                          cellpadding="0"
+                          border="0"
+                          class="el-table__body"
+                          style="width: 720px"
+                        >
+                          <colgroup>
+                            <col name="el-table_3_column_8" width="80" />
+                            <col name="el-table_3_column_9" width="200" />
+                            <col name="el-table_3_column_10" width="200" />
+                            <col name="el-table_3_column_11" width="80" />
+                            <col name="el-table_3_column_12" width="80" />
+                            <col name="el-table_3_column_13" width="80" />
+                          </colgroup>
+                          <tbody>
+                            <!---->
+                          </tbody>
+                        </table>
+                        <div class="el-table__empty-block" style="width: 720px">
+                          <span class="el-table__empty-text">暂无数据</span>
+                        </div>
+                        <!---->
+                      </div>
+                      <!----><!----><!----><!---->
+                      <div
+                        class="el-table__column-resize-proxy"
+                        style="display: none"
+                      ></div>
+                      <div class="el-loading-mask" style="display: none">
+                        <div class="el-loading-spinner">
+                          <svg viewBox="25 25 50 50" class="circular">
+                            <circle
+                              cx="50"
+                              cy="50"
+                              r="20"
+                              fill="none"
+                              class="path"
+                            ></circle></svg
+                          ><!---->
+                        </div>
+                      </div>
+                    </div>
+                    <div
+                      data-v-78885a38=""
+                      class="pull-left el-pagination is-background"
+                    >
+                      <span class="el-pagination__total">共 0 条</span
+                      ><span class="el-pagination__sizes"
+                        ><div class="el-select el-select--mini">
+                          <!---->
+                          <div class="el-input el-input--mini el-input--suffix">
+                            <!----><input
+                              type="text"
+                              readonly="readonly"
+                              autocomplete="off"
+                              placeholder="请选择"
+                              class="el-input__inner"
+                            /><!----><span class="el-input__suffix"
+                              ><span class="el-input__suffix-inner"
+                                ><i
+                                  class="el-select__caret el-input__icon el-icon-arrow-up"
+                                ></i
+                                ><!----><!----></span
+                              ><!----></span
+                            ><!---->
+                          </div>
+                          <div
+                            class="el-select-dropdown el-popper"
+                            style="display: none"
+                          >
+                            <div class="el-scrollbar" style="">
+                              <div
+                                class="el-select-dropdown__wrap el-scrollbar__wrap"
+                                style="
+                                  margin-bottom: -15px;
+                                  margin-right: -15px;
+                                "
+                              >
+                                <ul
+                                  class="el-scrollbar__view el-select-dropdown__list"
+                                >
+                                  <!---->
+                                  <li class="el-select-dropdown__item">
+                                    <span>10条/页</span>
+                                  </li>
+                                  <li class="el-select-dropdown__item selected">
+                                    <span>20条/页</span>
+                                  </li>
+                                  <li class="el-select-dropdown__item">
+                                    <span>30条/页</span>
+                                  </li>
+                                  <li class="el-select-dropdown__item">
+                                    <span>50条/页</span>
+                                  </li>
+                                </ul>
+                              </div>
+                              <div class="el-scrollbar__bar is-horizontal">
+                                <div
+                                  class="el-scrollbar__thumb"
+                                  style="transform: translateX(0%)"
+                                ></div>
+                              </div>
+                              <div class="el-scrollbar__bar is-vertical">
+                                <div
+                                  class="el-scrollbar__thumb"
+                                  style="transform: translateY(0%)"
+                                ></div>
+                              </div>
+                            </div>
+                            <!---->
+                          </div>
+                        </div></span
+                      >
+                    </div>
+                    <div data-v-78885a38="" class="el-pagination is-background">
+                      <button
+                        type="button"
+                        disabled="disabled"
+                        class="btn-prev"
+                      >
+                        <i class="el-icon el-icon-arrow-left"></i>
+                      </button>
+                      <ul class="el-pager">
+                        <!----><!----><!----><!---->
+                      </ul>
+                      <button
+                        type="button"
+                        disabled="disabled"
+                        class="btn-next"
+                      >
+                        <i class="el-icon el-icon-arrow-right"></i>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div
+                data-v-01e6177e=""
+                data-v-78885a38=""
+                class="el-dialog__wrapper"
+                style="display: none"
+              >
+                <div
+                  role="dialog"
+                  aria-modal="true"
+                  aria-label="提示信息"
+                  class="el-dialog dialog"
+                  style="margin-top: 20%; width: 420px"
+                >
+                  <div class="el-dialog__header">
+                    <span class="el-dialog__title">提示信息</span
+                    ><!---->
+                  </div>
+                  <!---->
+                  <div class="el-dialog__footer">
+                    <span data-v-01e6177e="" class="dialog-footer"></span>
+                  </div>
+                </div>
+              </div>
+              <div
+                data-v-77cee96a=""
+                data-v-78885a38=""
+                class="el-dialog__wrapper"
+                style="display: none"
+              >
+                <div
+                  role="dialog"
+                  aria-modal="true"
+                  aria-label="提示信息"
+                  class="el-dialog dialog"
+                  style="margin-top: 20%; width: 420px"
+                >
+                  <div class="el-dialog__header">
+                    <span class="el-dialog__title">提示信息</span
+                    ><!---->
+                  </div>
+                  <!---->
+                  <div class="el-dialog__footer">
+                    <span data-v-77cee96a="" class="dialog-footer"></span>
+                  </div>
+                </div>
+              </div>
+              <div
+                data-v-78885a38=""
+                class="el-dialog__wrapper"
+                style="display: none"
+              >
+                <div
+                  role="dialog"
+                  aria-modal="true"
+                  aria-label="实例名称"
+                  class="el-dialog dialog"
+                  style="margin-top: 12%; width: 500px"
+                >
+                  <div class="el-dialog__header">
+                    <span class="el-dialog__title">实例名称</span
+                    ><button
+                      type="button"
+                      aria-label="Close"
+                      class="el-dialog__headerbtn"
+                    >
+                      <i class="el-dialog__close el-icon el-icon-close"></i>
+                    </button>
+                  </div>
+                  <!---->
+                  <div class="el-dialog__footer">
+                    <span data-v-78885a38="" class="dialog-footer"
+                      ><button
+                        data-v-78885a38=""
+                        type="button"
+                        class="el-button el-button--primary el-button--small"
+                      >
+                        <!----><!----><span>确 定</span>
+                      </button>
+                      <button
+                        data-v-78885a38=""
+                        type="button"
+                        class="el-button el-button--default el-button--small"
+                      >
+                        <!----><!----><span>取 消</span>
+                      </button></span
+                    >
+                  </div>
+                </div>
+              </div>
+              <div
+                data-v-78885a38=""
+                class="el-dialog__wrapper"
+                style="display: none"
+              >
+                <div
+                  role="dialog"
+                  aria-modal="true"
+                  aria-label="备注"
+                  class="el-dialog dialog"
+                  style="margin-top: 12%; width: 500px"
+                >
+                  <div class="el-dialog__header">
+                    <span class="el-dialog__title">备注</span
+                    ><button
+                      type="button"
+                      aria-label="Close"
+                      class="el-dialog__headerbtn"
+                    >
+                      <i class="el-dialog__close el-icon el-icon-close"></i>
+                    </button>
+                  </div>
+                  <!---->
+                  <div class="el-dialog__footer">
+                    <span data-v-78885a38="" class="dialog-footer"
+                      ><button
+                        data-v-78885a38=""
+                        type="button"
+                        class="el-button el-button--primary el-button--small"
+                      >
+                        <!----><!----><span>确 定</span>
+                      </button>
+                      <button
+                        data-v-78885a38=""
+                        type="button"
+                        class="el-button el-button--default el-button--small"
+                      >
+                        <!----><!----><span>取 消</span>
+                      </button></span
+                    >
+                  </div>
+                </div>
+              </div>
+              <div
+                data-v-78885a38=""
+                class="el-dialog__wrapper"
+                style="display: none"
+              >
+                <div
+                  role="dialog"
+                  aria-modal="true"
+                  aria-label="关闭云服务器"
+                  class="el-dialog dialog"
+                  style="margin-top: 18.5%; width: 500px"
+                >
+                  <div class="el-dialog__header">
+                    <span class="el-dialog__title">关闭云服务器</span
+                    ><button
+                      type="button"
+                      aria-label="Close"
+                      class="el-dialog__headerbtn"
+                    >
+                      <i class="el-dialog__close el-icon el-icon-close"></i>
+                    </button>
+                  </div>
+                  <!---->
+                  <div class="el-dialog__footer">
+                    <span data-v-78885a38="" class="dialog-footer"
+                      ><button
+                        data-v-78885a38=""
+                        type="button"
+                        class="el-button el-button--default el-button--small"
+                      >
+                        <!----><!----><span>取 消</span>
+                      </button>
+                      <button
+                        data-v-78885a38=""
+                        type="button"
+                        class="el-button el-button--primary el-button--small"
+                      >
+                        <!----><!----><span>确 定</span>
+                      </button></span
+                    >
+                  </div>
+                </div>
+              </div>
+              <div
+                data-v-78885a38=""
+                class="el-dialog__wrapper"
+                style="display: none"
+              >
+                <div
+                  role="dialog"
+                  aria-modal="true"
+                  aria-label="管理终端"
+                  class="el-dialog dialog"
+                  style="margin-top: 12%; width: 450px"
+                >
+                  <div class="el-dialog__header">
+                    <span class="el-dialog__title">管理终端</span
+                    ><button
+                      type="button"
+                      aria-label="Close"
+                      class="el-dialog__headerbtn"
+                    >
+                      <i class="el-dialog__close el-icon el-icon-close"></i>
+                    </button>
+                  </div>
+                  <!----><!---->
+                </div>
+              </div>
+              <div
+                data-v-78885a38=""
+                class="el-dialog__wrapper"
+                style="display: none"
+              >
+                <div
+                  role="dialog"
+                  aria-modal="true"
+                  aria-label="操作保护"
+                  class="el-dialog dialog"
+                  style="margin-top: 18.5%; width: 660px"
+                >
+                  <div class="el-dialog__header">
+                    <span class="el-dialog__title">操作保护</span
+                    ><button
+                      type="button"
+                      aria-label="Close"
+                      class="el-dialog__headerbtn"
+                    >
+                      <i class="el-dialog__close el-icon el-icon-close"></i>
+                    </button>
+                  </div>
+                  <!---->
+                  <div class="el-dialog__footer">
+                    <span data-v-78885a38="" class="dialog-footer"
+                      ><button
+                        data-v-78885a38=""
+                        type="button"
+                        class="el-button el-button--primary el-button--small"
+                      >
+                        <!----><!----><span>确 定</span>
+                      </button>
+                      <button
+                        data-v-78885a38=""
+                        type="button"
+                        class="el-button el-button--default el-button--small"
+                      >
+                        <!----><!----><span>取 消</span>
+                      </button></span
+                    >
+                  </div>
+                </div>
+              </div>
+              <div
+                data-v-78885a38=""
+                class="el-dialog__wrapper"
+                style="display: none"
+              >
+                <div
+                  role="dialog"
+                  aria-modal="true"
+                  aria-label="dialog"
+                  class="el-dialog show-img"
+                  style="margin-top: 2%; width: 26%"
+                >
+                  <div class="el-dialog__header">
+                    <span class="el-dialog__title"></span
+                    ><button
+                      type="button"
+                      aria-label="Close"
+                      class="el-dialog__headerbtn"
+                    >
+                      <i class="el-dialog__close el-icon el-icon-close"></i>
+                    </button>
+                  </div>
+                  <!----><!---->
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="el-dialog__wrapper coupon-dialog" style="display: none">
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-label="提示"
+          class="el-dialog"
+          style="margin-top: 5vh; width: 612px"
+        >
+          <div class="el-dialog__header">
+            <span class="dialog-footer"></span
+            ><button
+              type="button"
+              aria-label="Close"
+              class="el-dialog__headerbtn"
+            >
+              <i class="el-dialog__close el-icon el-icon-close"></i>
+            </button>
+          </div>
+          <!----><!---->
+        </div>
+      </div>
+    </div>
+    <script
+      type="text/javascript"
+      src="./static/js/manifest.08f2f55bb40947efb7be.js"
+    ></script>
+    <script
+      type="text/javascript"
+      src="./static/js/vendor.c926c11058d4ab1e72c9.js"
+    ></script>
+    <script
+      type="text/javascript"
+      src="./static/js/app.f7139257334b3461e8cc.js"
+    ></script>
+  </body>
+</html>

@@ -1,0 +1,700 @@
+<!doctype html>
+<html lang="en">
+  <script src="https://hm.baidu.com/hm.js?491579dd37a8aefdc599ec4d556fd33f"></script>
+  <head>
+    <meta charset="UTF-8" />
+    <title>登录控制台_阿贝云</title>
+    <meta
+      name="keywords"
+      content="云服务器，虚拟主机，域名注册，免费虚拟主机，免费空间，免备案空间，免费服务器，免费云主机，阿贝云"
+    />
+    <meta
+      name="description"
+      content="阿贝云一直为广大客户提供高质量的云服务器、虚拟主机、域名注册等互联网服务，同时我们坚持初心十年不间断提供永久免费虚拟主机、免费服务器产品给学生和初创业者使用。"
+    />
+    <link rel="stylesheet" href="https://img.abeiyun.com/common3.css?ver=15" />
+    <link
+      rel="stylesheet"
+      href="https://img.abeiyun.com/css/header.css?ver=01"
+    />
+    <link
+      rel="stylesheet"
+      href="https://img.abeiyun.com/css/module/home.css?ver=01"
+    />
+    <link
+      rel="stylesheet"
+      href="https://img.abeiyun.com/css/module/login.css?ver=01"
+    />
+    <link
+      rel="stylesheet"
+      href="https://img.abeiyun.com/css/bannerSource.css?ver=01"
+    />
+    <link
+      rel="stylesheet"
+      href="https://img.abeiyun.com/css/front.css?ver=01"
+    />
+    <link
+      rel="stylesheet"
+      href="https://img.abeiyun.com/libs/skins/abeiyunDialog.css?ver=01"
+    />
+
+    <script src="https://img.abeiyun.com/libs/jquery.min.js?ver=01"></script>
+    <script src="https://img.abeiyun.com/libs/jquery.cookie.js"></script>
+    <script src="https://img.abeiyun.com/libs/public.js?ver=04"></script>
+    <script src="https://img.abeiyun.com/js/front.js?ver=01"></script>
+    <script src="https://img.abeiyun.com/libs/jquery.dialog.js?ver=01"></script>
+    <script src="https://img.abeiyun.com/libs/jquery.core.js?ver=01"></script>
+    <script src="https://img.abeiyun.com/libs/jquery.form.js?ver=01"></script>
+    <script src="https://img.abeiyun.com/libs/jquery.formValidator.js?ver=01"></script>
+    <script src="https://img.abeiyun.com/libs/iframeTools.js?ver=01"></script>
+    <script src="https://img.abeiyun.com/js/module/login.js?ver=02"></script>
+    <script src="https://img.abeiyun.com/js/theme.js?ver=01"></script>
+    <style>
+      .xixun {
+        background: #ea3223;
+      }
+      .xixun a span {
+        color: #fdfb54;
+      }
+      #header[data-theme="transparent-light"]:not(:hover):not(.show-search)
+        .header-top {
+        border-color: rgba(255, 255, 255, 0.2);
+        background-color: transparent;
+      }
+
+      #header[data-theme="transparent-light"]:not(:hover):not(.show-search)
+        .header-search-inner {
+        background-color: transparent;
+      }
+
+      #header[data-theme="transparent-light"]:not(:hover):not(.show-search)
+        .header-bottom {
+        background: transparent;
+      }
+    </style>
+    <style>
+      ._wrapper_1ooyb_1 {
+        position: fixed;
+        inset: 0;
+        z-index: 2147483641; /* 确保在所有元素之上，除了 panel */
+        cursor: wait;
+        overflow: hidden;
+
+        display: none;
+      }
+
+      ._wrapper_1ooyb_1._visible_1ooyb_11 {
+        display: block;
+      }
+      /* AI 光标样式 */
+      ._cursor_1dgwb_2 {
+        position: absolute;
+        width: var(--cursor-size, 75px);
+        height: var(--cursor-size, 75px);
+        pointer-events: none;
+        z-index: 10000;
+      }
+
+      ._cursorBorder_1dgwb_10 {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(
+          45deg,
+          rgb(57, 182, 255),
+          rgb(189, 69, 251)
+        );
+        mask-image: url("data:image/svg+xml,%3csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20100%20100'%20fill='none'%3e%3cg%3e%3cpath%20d='M%2015%2042%20L%2015%2036.99%20Q%2015%2031.99%2023.7%2031.99%20L%2028.05%2031.99%20Q%2032.41%2031.99%2032.41%2021.99%20L%2032.41%2017%20Q%2032.41%2012%2041.09%2016.95%20L%2076.31%2037.05%20Q%2085%2042%2076.31%2046.95%20L%2041.09%2067.05%20Q%2032.41%2072%2032.41%2062.01%20L%2032.41%2057.01%20Q%2032.41%2052.01%2023.7%2052.01%20L%2019.35%2052.01%20Q%2015%2052.01%2015%2047.01%20Z'%20fill='none'%20stroke='%23000000'%20stroke-width='6'%20stroke-miterlimit='10'%20style='stroke:%20light-dark(rgb(0,%200,%200),%20rgb(255,%20255,%20255));'/%3e%3c/g%3e%3c/svg%3e");
+        mask-size: 100% 100%;
+        mask-repeat: no-repeat;
+
+        transform-origin: center;
+        transform: rotate(-135deg) scale(1.2);
+        margin-left: -10px;
+        margin-top: -18px;
+      }
+
+      ._cursorFilling_1dgwb_25 {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        background: url("data:image/svg+xml,%3csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20100%20100'%3e%3cdefs%3e%3c/defs%3e%3cg%20xmlns='http://www.w3.org/2000/svg'%20style='filter:%20drop-shadow(light-dark(rgba(0,%200,%200,%200.4),%20rgba(237,%20237,%20237,%200.4))%203px%204px%204px);'%3e%3cpath%20d='M%2015%2042%20L%2015%2036.99%20Q%2015%2031.99%2023.7%2031.99%20L%2028.05%2031.99%20Q%2032.41%2031.99%2032.41%2021.99%20L%2032.41%2017%20Q%2032.41%2012%2041.09%2016.95%20L%2076.31%2037.05%20Q%2085%2042%2076.31%2046.95%20L%2041.09%2067.05%20Q%2032.41%2072%2032.41%2062.01%20L%2032.41%2057.01%20Q%2032.41%2052.01%2023.7%2052.01%20L%2019.35%2052.01%20Q%2015%2052.01%2015%2047.01%20Z'%20fill='%23ffffff'%20stroke='none'%20style='fill:%20%23ffffff;'/%3e%3c/g%3e%3c/svg%3e");
+        background-size: 100% 100%;
+        background-repeat: no-repeat;
+
+        transform-origin: center;
+        transform: rotate(-135deg) scale(1.2);
+        margin-left: -10px;
+        margin-top: -18px;
+      }
+
+      ._cursorRipple_1dgwb_39 {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        margin-left: -50%;
+        margin-top: -50%;
+
+        &::after {
+          content: "";
+          opacity: 0;
+          position: absolute;
+          inset: 0;
+          border: 4px solid rgba(57, 182, 255, 1);
+          border-radius: 50%;
+        }
+      }
+
+      ._cursor_1dgwb_2._clicking_1dgwb_57 ._cursorRipple_1dgwb_39::after {
+        animation: _cursor-ripple_1dgwb_1 300ms ease-out forwards;
+      }
+
+      @keyframes _cursor-ripple_1dgwb_1 {
+        0% {
+          transform: scale(0);
+          opacity: 1;
+        }
+        100% {
+          transform: scale(2);
+          opacity: 0;
+        }
+      }
+      /*$vite$:1*/
+    </style>
+  </head>
+  <body class="banner-engine" style="min-width: 1200px">
+    <div
+      style="
+        position: absolute;
+        left: -9999em;
+        top: 302px;
+        width: auto;
+        z-index: 1987;
+      "
+      class="aui_state_focus"
+    >
+      <div class="aui_outer">
+        <table class="aui_border">
+          <tbody>
+            <tr>
+              <td class="aui_nw"></td>
+              <td class="aui_n"></td>
+              <td class="aui_ne"></td>
+            </tr>
+            <tr>
+              <td class="aui_w"></td>
+              <td class="aui_c">
+                <div class="aui_inner">
+                  <table class="aui_dialog">
+                    <tbody>
+                      <tr>
+                        <td colspan="2" class="aui_header">
+                          <div class="aui_titleBar">
+                            <div class="aui_title" style="cursor: move">
+                              消息
+                            </div>
+                            <a class="aui_close" href="javascript:;"></a>
+                          </div>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td class="aui_icon" style="display: none">
+                          <div
+                            class="aui_iconBg"
+                            style="background: none"
+                          ></div>
+                        </td>
+                        <td class="aui_main" style="width: auto; height: auto">
+                          <div class="aui_content" style="padding: 20px 25px">
+                            <div class="aui_loading">
+                              <span>loading..</span>
+                            </div>
+                          </div>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td colspan="2" class="aui_footer">
+                          <div class="aui_buttons" style="display: none"></div>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </td>
+              <td class="aui_e"></td>
+            </tr>
+            <tr>
+              <td class="aui_sw"></td>
+              <td class="aui_s"></td>
+              <td class="aui_se" style="cursor: se-resize"></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="xixun">
+      <a href="/gfserver/">
+        <span>【高防物理机, 99元/首月】</span>
+        <span>&gt;&gt;查看详情 </span>
+      </a>
+      <a href="/hzcloud/">
+        <span>&nbsp;&nbsp;&nbsp;&nbsp;【11.11特惠】</span>
+        <span>华中BGP机房，首月10元,低至388元/年</span>
+        <span>&gt;&gt;点击购买</span>
+      </a>
+      <span class="xixun-close">X</span>
+    </div>
+    <div id="header" meta-data-adjust-app="hide">
+      <div class="header-container">
+        <div class="header-wrapper">
+          <div class="header-top header-wrapper-bg">
+            <div class="header-main">
+              <div class="header-menu">
+                <i class="header-icon header-icon-menu"></i>
+              </div>
+              <h2>
+                <a
+                  class="header-logo"
+                  bi_name="logo"
+                  href="//www.abeiyun.com"
+                  style="font-size: 0"
+                  >阿贝云</a
+                >
+              </h2>
+              <div class="header-tools clearfix">
+                <ul class="header-tools-list">
+                  <li
+                    class="header-search J-header-search"
+                    bi_parent_name="search"
+                  >
+                    <form
+                      action="/help/search"
+                      class="header-search-inner J-serach-form"
+                      tabindex="-1"
+                      method="get"
+                    >
+                      <input
+                        class="J-search-input"
+                        name="k"
+                        type="text"
+                        placeholder="搜索"
+                        data-active-placeholder="输入您想要搜索的关键词"
+                        autocomplete="off"
+                      />
+                      <button
+                        type="submit"
+                        class="header-search-submit"
+                      ></button>
+                      <i class="header-search-close J-search-close"></i>
+                    </form>
+                  </li>
+                  <li class="header-console"><a href="/control">控制台</a></li>
+                  <li class="header-console"><a href="/help">帮助</a></li>
+                  <li class="header-login">
+                    <a href="/login" class="btn js-login">登录</a>
+                  </li>
+                  <li class="header-register">
+                    <a href="/register" class="btn js-register">注册</a>
+                  </li>
+                  <li class="header-user user-info">
+                    <div class="header-user-avator">
+                      <a href="/control">
+                        <img
+                          class="header-tool-user-avator-img account-pic"
+                          src="https://img.abeiyun.com/img/xiao.png"
+                        />
+                      </a>
+                    </div>
+                    <div class="header-user-name">
+                      <span class="my-acct"></span
+                      ><i class="header-icon-dropdown"></i>
+                    </div>
+                    <div
+                      class="header-user-info user-info-layer"
+                      id="userPanel"
+                    >
+                      <div class="user-box">
+                        <span>欢迎：</span>
+                        <span
+                          class="username-text-show text-overflow"
+                          id="usernameShow"
+                        ></span>
+                        <span
+                          class="auth-status pull-right"
+                          style="display: inline"
+                          >已实名认证</span
+                        >
+                        <a
+                          class="new-auth pull-right"
+                          href="/control/#/user2"
+                          target="_blank"
+                          style="display: none"
+                          >实名认证&gt;&gt;</a
+                        >
+                      </div>
+                      <div class="pay-box">
+                        <span>￥<span id="userMoney">0.40</span></span>
+                        <a href="/control/#/caiwu" target="/user/">充值</a>
+                      </div>
+                      <div class="user-panel-body">
+                        <ul class="shortcut-menu-list">
+                          <li class="shortcut-menu-item">
+                            <a
+                              class="user-icon-01"
+                              href="/control/#/product"
+                              target="/control/"
+                            >
+                              产品管理
+                              <span class="user-record-count" id="serverCount"
+                                >2</span
+                              >
+                            </a>
+                          </li>
+                          <li class="shortcut-menu-item">
+                            <a
+                              class="user-icon-02"
+                              href="/control/#/message"
+                              target="/control/"
+                            >
+                              消息中心
+                              <span class="user-record-count" id="msgCount"
+                                >1</span
+                              >
+                            </a>
+                          </li>
+                          <li class="shortcut-menu-item">
+                            <a
+                              class="user-icon-03"
+                              href="/control/#/fuwu"
+                              target="/control/"
+                              >提交工单</a
+                            >
+                          </li>
+                        </ul>
+                        <div class="user-panel-bottom">
+                          <a
+                            class="exit-btn pull-right"
+                            id="loginout"
+                            href="javascript:void(0)"
+                            >退出</a
+                          >
+                        </div>
+                      </div>
+                    </div>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+          <span class="tips" style="left: 650px">单机200G防御</span>
+          <span class="tips" style="left: 425px">三网BGP多线</span>
+          <span
+            class="tips"
+            style="
+              position: absolute;
+              top: 27px;
+              left: 775px;
+              background-color: #ffff00;
+              padding: 1px 3px 2px;
+              border-radius: 4px;
+              z-index: 1000;
+              font-size: 12px;
+              line-height: 1.5;
+              color: #6f7479;
+            "
+            >单机400G防御</span
+          >
+          <div class="header-bottom clearfix">
+            <div class="header-nav">
+              <ul class="header-nav-list">
+                <li data-key="huodong">
+                  <a href="/hzcloud/">最新活动</a>
+                </li>
+                <li data-key="free">
+                  <a href="/free">免费产品</a>
+                </li>
+                <li data-key="market">
+                  <a href="/domain">域名</a>
+                </li>
+                <li data-key="price">
+                  <a href="/vhost">虚拟主机</a>
+                </li>
+                <li data-key="ei">
+                  <a href="/server/">云服务器</a>
+                </li>
+                <li data-key="bgpcloud">
+                  <a href="/bgpcloud">BGP云服务器</a>
+                </li>
+                <li data-key="hk">
+                  <a href="/hkcloud/">香港云服务器</a>
+                </li>
+                <li data-key="gfcloud">
+                  <a href="/gfcloud">高防云服务器</a>
+                </li>
+                <li data-key="gfserver">
+                  <a href="/gfserver">高防物理服务器</a>
+                </li>
+                <li data-key="vip" class="">
+                  <a href="/act/vip/">终身服务器</a>
+                </li>
+                <li data-key="ssl">
+                  <a href="/ssl">SSL证书</a>
+                </li>
+                <li data-key="developer">
+                  <a href="/beian">备案</a>
+                </li>
+                <li data-key="developer" class="">
+                  <a href="/articles">资讯中心</a>
+                </li>
+              </ul>
+              <div
+                class="header-nav-hover-line"
+                style="width: 0px; left: 1111.12px"
+              ></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="main">
+      <div class="container">
+        <div class="content">
+          <div class="wrap loginwrap">
+            <div class="autoflag auto">
+              <div class="wrap-left">
+                <h1>阿贝云 - 十年云计算服务提供商</h1>
+                <p>
+                  一个拥有行业资深经验的团队，从2001年开始就提供免费主机服务
+                </p>
+                <p>投资千万，为免费主机、智能云、物联网继续疯狂</p>
+                <p>十年行业沉淀、一流的客服、技术服务团队</p>
+                <p>致力于为客户提供专业、高速、稳定的云计算服务</p>
+              </div>
+              <div class="wrap-right">
+                <div class="goSaoma"></div>
+                <div class="goSaomaTi"></div>
+                <div class="login-title">用户登录</div>
+                <form action="/login/login.html" id="loginForm" method="post">
+                  <input type="hidden" name="redirectURL" value="" />
+                  <div class="login-form-item form-item-bg form-item-bg-user">
+                    <input
+                      type="text"
+                      name="username"
+                      placeholder="手机"
+                      id="userName"
+                      class="input-focus-handle ui-autocomplete-input"
+                      value=""
+                      autocomplete="off"
+                    />
+                    <div id="emailAutoComplete" class="email-complete-list">
+                      <ul
+                        class="ui-autocomplete ui-front ui-menu ui-widget ui-widget-content"
+                        id="ui-id-1"
+                        tabindex="0"
+                        style="display: none"
+                      ></ul>
+                    </div>
+                  </div>
+                  <div
+                    class="login-form-item form-item-bg form-item-bg-lock password-input-wrap"
+                  >
+                    <i class="opyan eye-close"></i>
+                    <input
+                      id="passwordInput"
+                      type="password"
+                      name="password"
+                      placeholder="登录密码"
+                      class="input-focus-handle"
+                    />
+                    <div
+                      class="caps-lock-remind"
+                      id="capsLockRemind"
+                      style="display: none"
+                    >
+                      大写锁定已打开
+                    </div>
+                  </div>
+                  <div class="login-options">
+                    <a href="/getPassword/">忘记密码？</a>
+                  </div>
+                  <input
+                    type="submit"
+                    value="登 录"
+                    id="loginSubmit"
+                    class="login-submit default-transition default-font"
+                  />
+                </form>
+                <div class="go-reg">
+                  还没有账号？立即<a href="/register/">免费注册</a>
+                </div>
+                <div class="zjw-login-saoma" style="display: none">
+                  <div class="goPass"></div>
+                  <h2>手机扫码，安全登录</h2>
+                  <div class="zjw-login-saoma-img-box">
+                    <img
+                      id="imgMa"
+                      src="https://api.abeiyun.com/weixin/img_login.php"
+                      alt=""
+                      width="130"
+                    />
+                    <div class="zjw-login-saoma-btn-box hide">
+                      <h4>二维码已失效</h4>
+                      <a href="javascript:;" class="changeMa">点击刷新</a>
+                    </div>
+                  </div>
+                  <div class="saoma-text">
+                    <p>打开 <span>手机微信</span></p>
+                    <p>扫一扫登录</p>
+                  </div>
+                  <div class="go-reg">
+                    还没有账号？立即<a href="/register/">免费注册</a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="back">
+          <div class="items" id="slider-back">
+            <div
+              class="banner-item item1"
+              style="
+                background-image: url(https://img.abeiyun.com/img/login_bg_x.jpg);
+                display: block;
+              "
+            ></div>
+          </div>
+        </div>
+      </div>
+      <div class="footer" style="min-width: 1200px">
+        <div class="nav-links">
+          <ul>
+            <li><a href="/about/">关于我们</a></li>
+            <li>|</li>
+            <li><a href="/about/#contactUs">联系我们</a></li>
+            <li>|</li>
+            <li><a href="/help/">帮助文档</a></li>
+            <li>|</li>
+            <li><a href="/free/">免费虚拟主机</a></li>
+            <li>|</li>
+            <li><a href="/free/">免费云服务器</a></li>
+            <li>|</li>
+            <li><a href="/vhost/">虚拟主机</a></li>
+            <li>|</li>
+            <li><a href="/server/">云服务器</a></li>
+            <li>|</li>
+            <li><a href="/gfcloud/">高防服务器</a></li>
+            <li>|</li>
+            <li><a href="/domain/">域名注册</a></li>
+            <li>|</li>
+            <li><a href="https://www.ip138.com/idc/">idc公司</a></li>
+          </ul>
+        </div>
+        <div class="ownership">
+          <span
+            >Copyright © 2008-2018 abeiyun.com. All Rights Reserved. 阿贝云
+            版权所有 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a
+              href="http://www.beian.miit.gov.cn/"
+              target="_blank"
+            >
+              陕ICP备20002307号</a
+            ></span
+          >
+          <p style="margin-top: -8px">
+            《中华人民共和国增值电信业务经营许可证》全网IDC/ISP：B1-20182862
+          </p>
+        </div>
+      </div>
+      <div class="float-consult">
+        <ul>
+          <li class="cart">
+            <a href="/cart/" rel="nofollow" class="cloumn cs7">购物车</a>
+          </li>
+          <li>
+            <p
+              class="cloumn cs1"
+              id="qd23551882315963075c42d0ca6bcaab0164c6d65758800881115"
+            >
+              在线客服
+            </p>
+
+            <div class="consult preale">
+              <h2>售前QQ：189982180<span>服务时间：08:30AM-21:00PM</span></h2>
+              <div class="list">
+                <div class="contact-item">
+                  <i class="icon-phone"></i>
+                  400-029-1667 按1键
+                </div>
+                <div class="contact-item">
+                  <i class="icon-qq"></i>
+                  <a href="javascript:void(0);" rel="nofollow" class="qq-line">
+                    <i class="icon-QQ"></i>
+                    <div class="contact-row">阿贝云售前部为您服务</div>
+                    <div class="contact-row">QQ号码：189982180</div>
+                  </a>
+                </div>
+                <div class="contact-item">
+                  <i class="icon-gongdan"></i>
+                  <a
+                    href="/control/#/fuwu"
+                    rel="nofollow"
+                    class="submit-gongdan"
+                  >
+                    QQ号码：189982180
+                  </a>
+                </div>
+              </div>
+            </div>
+          </li>
+          <li>
+            <p
+              class="cloumn cs6"
+              id="Td23551882315963075c42d0ca6bcaab0164c6d65758800881115"
+            >
+              微信vip18002
+            </p>
+            <div class="ewm" style="display: none">
+              <img
+                src="https://img.abeiyun.com/img/weixin.png"
+                width="118"
+                height="118"
+              />
+            </div>
+          </li>
+          <li>
+            <a href="/control/#/fuwu" rel="nofollow" class="cloumn cs5">工单</a>
+          </li>
+          <li class="back-top" style="visibility: hidden">
+            <p class="cloumn cs8">TOP</p>
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <script>
+      var _hmt = _hmt || [];
+      (function () {
+        var hm = document.createElement("script");
+        hm.src = "https://hm.baidu.com/hm.js?491579dd37a8aefdc599ec4d556fd33f";
+        var s = document.getElementsByTagName("script")[0];
+        s.parentNode.insertBefore(hm, s);
+      })();
+    </script>
+    <script src="https://img.abeiyun.com/js/header.js?ver=01"></script>
+
+    <div
+      style="
+        display: none;
+        position: fixed;
+        left: 0px;
+        top: 0px;
+        width: 100%;
+        height: 100%;
+        cursor: move;
+        opacity: 0;
+        background: rgb(255, 255, 255);
+      "
+    ></div>
+  </body>
+</html>

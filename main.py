@@ -14,6 +14,7 @@ sys.path.insert(0, str(ROOT))
 
 from steps.generate_content import generate_content
 from steps.post_zhihu import post_zhihu
+from steps.submit_abeiyun import submit_abeiyun
 from steps.submit_sanfeng import submit_sanfeng
 from utils.logger import create_output_dir, save_json, setup_logger
 from utils.scheduler import mark_success, should_run, write_meta
@@ -44,7 +45,7 @@ def main(force: bool = False) -> int:
     result: dict | None = None
 
     try:
-        logger.info("步骤 1/3: AI 生成内容")
+        logger.info("步骤 1/4: AI 生成内容")
         content = generate_content(config)
         save_json(
             output_dir / "content.json",
@@ -56,7 +57,7 @@ def main(force: bool = False) -> int:
         )
         logger.info("标题: %s", content["title"])
 
-        logger.info("步骤 2/3: 知乎发帖")
+        logger.info("步骤 2/4: 知乎发帖")
         result = post_zhihu(content["title"], content["body"], config, output_dir)
         save_json(
             output_dir / "content.json",
@@ -76,12 +77,25 @@ def main(force: bool = False) -> int:
             logger.info("截图视口: %sx%s", vp["width"], vp["height"])
 
         if config.get("sanfeng", {}).get("enabled"):
-            logger.info("步骤 3/3: 三丰云登录并打开续期页")
+            logger.info("步骤 3/4: 三丰云登录并打开续期页")
             sanfeng_result = submit_sanfeng(result["screenshot_path"], result["url"], config)
             save_json(output_dir / "sanfeng.json", sanfeng_result)
             logger.info("三丰云续期页: %s", sanfeng_result.get("form_url", ""))
         else:
-            logger.info("步骤 3/3: 三丰云已跳过（sanfeng.enabled=false）")
+            logger.info("步骤 3/4: 三丰云已跳过（sanfeng.enabled=false）")
+
+        if config.get("abeiyun", {}).get("enabled"):
+            logger.info("步骤 4/4: 阿贝云登录、进入续期页并填写（人工提交）")
+            abei_result = submit_abeiyun(result["screenshot_path"], result["url"], config)
+            save_json(output_dir / "abeiyun.json", abei_result)
+            logger.info(
+                "阿贝云: 已填表=%s，自动提交=%s，页面=%s",
+                abei_result.get("fill_form"),
+                abei_result.get("submit_form"),
+                abei_result.get("page_url", ""),
+            )
+        else:
+            logger.info("步骤 4/4: 阿贝云已跳过（abeiyun.enabled=false）")
 
         duration = time.time() - started
         write_meta(output_dir, success=True, duration_sec=duration)

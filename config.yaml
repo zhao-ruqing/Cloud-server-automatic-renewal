@@ -36,6 +36,18 @@ sanfeng:
   form_load_wait_sec: 3
   pause_before_close_sec: 5
 
+abeiyun:
+  enabled: true
+  fill_form: true
+  submit_form: false
+  login_url: "https://www.abeiyun.com/login/"
+  server_url: "https://www.abeiyun.com/control/#/freeServer/1883838"
+  auth_state: "auth/abeiyun_state.json"
+  profile_dir: "abeiyun_profile"
+  login_wait_sec: 2
+  form_load_wait_sec: 3
+  pause_before_close_sec: 30
+
 browser:
   headless: false
   slow_mo: 100
