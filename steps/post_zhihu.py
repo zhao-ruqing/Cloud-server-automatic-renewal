@@ -1,3 +1,6 @@
+# -*- coding: utf-8 -*-
+"""Zhihu publish flow."""
+
 import time
 from pathlib import Path
 from typing import Any
@@ -18,7 +21,7 @@ def _is_login_required(page) -> bool:
     url = page.url
     if "signin" in url or "login" in url:
         return True
-    if page.locator('text="登录知乎"').count() > 0:
+    if page.locator(f'text="{ZHIHU["login_text"]}"').count() > 0:
         return True
     if page.locator(".SignFlowModal").count() > 0:
         return True
@@ -62,12 +65,11 @@ def _add_topic(page, topic: str) -> None:
         item.click()
     except PlaywrightTimeoutError as exc:
         page.screenshot(path="logs/topic_not_found.png", full_page=True)
-        raise ZhihuPostError(f"未找到话题「{topic}」，已保存 logs/topic_not_found.png") from exc
+        raise ZhihuPostError(f"topic not found: {topic}") from exc
     page.wait_for_timeout(500)
 
 
 def _click_publish(page, timeout_sec: int, *, before_delay_sec: float, after_delay_sec: float) -> str:
-    """点击发布，返回文章页 URL（去掉 /edit）。"""
     publish = page.locator(ZHIHU["publish_btn"])
     publish.wait_for(state="visible", timeout=15000)
 
@@ -77,7 +79,7 @@ def _click_publish(page, timeout_sec: int, *, before_delay_sec: float, after_del
             break
         page.wait_for_timeout(500)
     else:
-        raise ZhihuPostError("发布按钮长时间不可用，请检查标题、正文、话题是否填写完整")
+        raise ZhihuPostError("publish button stayed disabled")
 
     page.wait_for_timeout(int(before_delay_sec * 1000))
     publish.click()
@@ -90,15 +92,12 @@ def _click_publish(page, timeout_sec: int, *, before_delay_sec: float, after_del
         html_path.parent.mkdir(parents=True, exist_ok=True)
         html_path.write_text(page.content(), encoding="utf-8")
         page.screenshot(path="logs/publish_timeout.png", full_page=True)
-        raise ZhihuPostError(
-            f"发布超时（{timeout_sec}s），已保存 logs/publish_timeout.png"
-        ) from exc
+        raise ZhihuPostError(f"publish timeout ({timeout_sec}s)") from exc
 
     return _to_article_url(page.url)
 
 
 def _to_article_url(url: str) -> str:
-    """将 /p/xxx/edit 转为正式文章页 /p/xxx。"""
     cleaned = url.split("?")[0].split("#")[0].rstrip("/")
     if cleaned.endswith("/edit"):
         cleaned = cleaned[: -len("/edit")]
@@ -111,7 +110,6 @@ def _open_article_and_screenshot(
     screenshot_path: Path,
     browser_cfg: dict[str, Any],
 ) -> tuple[str, dict[str, int]]:
-    """打开正式文章阅读页并截取可视区域，返回 URL 与截图视口。"""
     page.goto(article_url, wait_until="domcontentloaded", timeout=60000)
     page.wait_for_timeout(2000)
 
@@ -127,9 +125,7 @@ def _open_article_and_screenshot(
         )
     except PlaywrightTimeoutError:
         if page.locator(ZHIHU["title_input"]).count() > 0:
-            raise ZhihuPostError(
-                f"仍停留在编辑页，无法截取阅读页。当前 URL: {page.url}"
-            )
+            raise ZhihuPostError(f"still on editor page: {page.url}")
 
     viewport = random_viewport(browser_cfg)
     page.set_viewport_size(viewport)
@@ -159,9 +155,7 @@ def post_zhihu(
         page.wait_for_timeout(2000)
 
         if _is_login_required(page):
-            raise ZhihuPostError(
-                "知乎登录已过期，请运行: python scripts/init_zhihu_auth.py"
-            )
+            raise ZhihuPostError("Zhihu login expired. Run: python scripts/init_zhihu_auth.py")
 
         _fill_title(page, title)
         _fill_body(page, body)
@@ -181,8 +175,8 @@ def post_zhihu(
         )
 
         review_hint = ""
-        if page.locator('text="审核"').count() > 0:
-            review_hint = "审核中"
+        if page.locator(f'text="{ZHIHU["review_text"]}"').count() > 0:
+            review_hint = "reviewing"
 
         return {
             "url": final_url,

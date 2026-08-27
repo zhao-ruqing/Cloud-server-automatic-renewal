@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from datetime import datetime
 from pathlib import Path
 
@@ -9,14 +10,14 @@ def should_run(interval_days: int, state_file: str) -> tuple[bool, str]:
     data = load_json(path)
     last = data.get("last_success_at")
     if not last:
-        return True, "无历史成功记录，允许运行"
+        return True, "no previous success, allow run"
 
     last_dt = datetime.fromisoformat(last)
     now = datetime.now()
     delta_days = (now - last_dt).total_seconds() / 86400
     if delta_days < interval_days:
-        return False, f"距上次成功仅 {delta_days:.1f} 天，需间隔 {interval_days} 天"
-    return True, f"距上次成功 {delta_days:.1f} 天，允许运行"
+        return False, f"only {delta_days:.1f}d since last success, need {interval_days}d"
+    return True, f"{delta_days:.1f}d since last success, allow run"
 
 
 def mark_success(state_file: str, url: str, output_dir: Path) -> None:

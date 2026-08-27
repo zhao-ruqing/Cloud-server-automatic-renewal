@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from pathlib import Path
 from typing import Any
 
@@ -5,7 +6,7 @@ from playwright.sync_api import Browser, BrowserContext, Page, Playwright, sync_
 
 ROOT = Path(__file__).resolve().parent.parent
 
-# 本机 Chrome 常见安装路径（Windows）
+# Common Windows Chrome install paths
 DEFAULT_CHROME_PATHS = [
     Path(r"C:\Program Files\Google\Chrome\Application\chrome.exe"),
     Path(r"C:\Program Files (x86)\Google\Chrome\Application\chrome.exe"),
@@ -14,13 +15,13 @@ DEFAULT_CHROME_PATHS = [
 
 
 def resolve_chrome_executable(browser_cfg: dict[str, Any]) -> Path | None:
-    """解析本机 Google Chrome 路径，避免启动 Chrome for Testing。"""
+    """Resolve local Google Chrome path (avoid Chrome for Testing)."""
     configured = browser_cfg.get("executable_path")
     if configured:
         path = Path(configured)
         if path.exists():
             return path
-        raise RuntimeError(f"配置的 Chrome 路径不存在: {path}")
+        raise RuntimeError(f"Chrome path not found: {path}")
 
     for path in DEFAULT_CHROME_PATHS:
         if path.exists():
@@ -42,7 +43,7 @@ def _build_launch_kwargs(browser_cfg: dict[str, Any], *, for_persistent: bool) -
         kwargs["executable_path"] = str(chrome_path)
         return kwargs
 
-    # 未找到 Chrome 时才尝试 Edge channel
+    # Fallback to Edge if Chrome is missing
     channel = browser_cfg.get("channel")
     if channel and channel != "chrome":
         kwargs["channel"] = channel
@@ -52,7 +53,7 @@ def _build_launch_kwargs(browser_cfg: dict[str, Any], *, for_persistent: bool) -
 
 
 class BrowserSession:
-    """Playwright 浏览器会话封装。"""
+    """Playwright browser session wrapper."""
 
     def __init__(
         self,
@@ -93,7 +94,7 @@ class BrowserSession:
 
 
 def launch_auth_browser(browser_cfg: dict[str, Any], profile_subdir: str) -> BrowserSession:
-    """init 脚本：持久化 Profile + 本机 Chrome。"""
+    """Init script: persistent profile + system Chrome."""
     playwright = sync_playwright().start()
     profile_dir = ROOT / "auth" / profile_subdir
     profile_dir.mkdir(parents=True, exist_ok=True)
@@ -109,12 +110,12 @@ def launch_auth_browser(browser_cfg: dict[str, Any], profile_subdir: str) -> Bro
     except Exception as exc:
         playwright.stop()
         raise RuntimeError(
-            "无法启动浏览器。请确认已安装 Google Chrome，"
-            f"或在 config.yaml 中设置 browser.executable_path。错误: {exc}"
+            "Failed to launch browser. Install Google Chrome "
+            f"or set browser.executable_path. Error: {exc}"
         ) from exc
 
     page = context.pages[0] if context.pages else context.new_page()
-    print(f"浏览器已启动（{label}）")
+    print(f"Browser started ({label})")
     return BrowserSession(
         playwright, None, context, page, persistent=True, browser_label=label
     )
@@ -125,7 +126,7 @@ def launch_browser(
     auth_state: str | Path | None = None,
     profile_subdir: str | None = None,
 ) -> BrowserSession:
-    """启动浏览器。若指定 profile_subdir，使用持久化 Profile（与 init 共用登录态）。"""
+    """Launch browser. Use persistent profile when profile_subdir is set."""
     playwright = sync_playwright().start()
     kwargs = _build_launch_kwargs(browser_cfg, for_persistent=bool(profile_subdir))
 
@@ -138,7 +139,7 @@ def launch_browser(
             context = playwright.chromium.launch_persistent_context(str(profile_dir), **kwargs)
         except Exception as exc:
             playwright.stop()
-            raise RuntimeError(f"无法启动浏览器: {exc}") from exc
+            raise RuntimeError(f"Failed to launch browser: {exc}") from exc
 
         page = context.pages[0] if context.pages else context.new_page()
         chrome_path = kwargs.get("executable_path", "")
@@ -151,7 +152,7 @@ def launch_browser(
         browser = playwright.chromium.launch(**kwargs)
     except Exception as exc:
         playwright.stop()
-        raise RuntimeError(f"无法启动浏览器: {exc}") from exc
+        raise RuntimeError(f"Failed to launch browser: {exc}") from exc
 
     context_kwargs: dict[str, Any] = {
         "viewport": browser_cfg.get("viewport", {"width": 1280, "height": 900}),

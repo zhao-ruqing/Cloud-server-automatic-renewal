@@ -1,4 +1,5 @@
-"""初始化三丰云登录态（二期预备）。"""
+# -*- coding: utf-8 -*-
+"""Init Sanfeng login state."""
 
 import sys
 from pathlib import Path
@@ -21,11 +22,11 @@ def main() -> None:
     browser_cfg = {**config["browser"], "headless": False, "slow_mo": 0}
 
     print("=" * 55)
-    print("三丰云登录态初始化")
+    print("Sanfeng login init")
     print("=" * 55)
-    print("1. 将打开三丰云登录页")
-    print("2. 确认账密已填充，手动点击「登录」")
-    print("3. 登录成功后回到此窗口按 Enter 保存")
+    print("1. Login page will open")
+    print("2. Confirm credentials filled, click Login")
+    print("3. Press Enter here to save")
     print("=" * 55)
 
     session = None
@@ -34,12 +35,12 @@ def main() -> None:
         page = session.page
         page.goto(sanfeng_cfg["login_url"], wait_until="domcontentloaded", timeout=60000)
 
-        input("\n登录成功后按 Enter 保存登录态... ")
+        input("\nAfter login, press Enter to save... ")
         session.save_state(sanfeng_cfg["auth_state"])
-        print(f"已保存: {sanfeng_cfg['auth_state']}")
+        print(f"Saved: {sanfeng_cfg['auth_state']}")
 
     except KeyboardInterrupt:
-        print("\n已取消（未保存）。")
+        print("\nCancelled.")
     finally:
         if session:
             session.close()

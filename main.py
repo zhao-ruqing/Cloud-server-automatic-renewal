@@ -1,4 +1,5 @@
-"""三丰云自动续期 — 主入口（一期：AI + 知乎发帖）。"""
+# -*- coding: utf-8 -*-
+"""Main entry: expiry-based scheduling + Zhihu post + cloud renewal."""
 
 import argparse
 import sys
@@ -12,52 +13,90 @@ from dotenv import load_dotenv
 ROOT = Path(__file__).resolve().parent
 sys.path.insert(0, str(ROOT))
 
+from steps.cloud_renewal import fetch_cloud_expiry, submit_cloud_renewal
 from steps.generate_content import generate_content
 from steps.post_zhihu import post_zhihu
-from steps.submit_abeiyun import submit_abeiyun
-from steps.submit_sanfeng import submit_sanfeng
+from steps.zhihu_keepalive import run_zhihu_keepalive, should_run_keepalive
+from utils.expiry_scheduler import mark_provider_success, should_run_by_expiry
 from utils.logger import create_output_dir, save_json, setup_logger
-from utils.scheduler import mark_success, should_run, write_meta
+from utils.scheduler import write_meta
+
+CLOUD_PROVIDERS = ("sanfeng", "abeiyun")
 
 
 def load_config(path: Path | None = None) -> dict:
-    cfg_path = path or ROOT / "config.yaml"
-    with cfg_path.open(encoding="utf-8") as f:
+    with (path or ROOT / "config.yaml").open(encoding="utf-8") as f:
         return yaml.safe_load(f)
 
 
-def main(force: bool = False) -> int:
+def resolve_providers_to_run(config: dict, force: bool, logger) -> list[str]:
+    to_run: list[str] = []
+    browser_cfg = config["browser"]
+
+    for name in CLOUD_PROVIDERS:
+        cfg = config.get(name, {})
+        if not cfg.get("enabled"):
+            logger.info("[%s] disabled", name)
+            continue
+
+        if force:
+            logger.info("[%s] force mode, will run", name)
+            to_run.append(name)
+            continue
+
+        try:
+            expiry = fetch_cloud_expiry(cfg, browser_cfg, name)
+            ok, reason = should_run_by_expiry(
+                expiry,
+                hours_before_min=cfg.get("run_hours_before_min", 20),
+                hours_before_max=cfg.get("run_hours_before_max", 22),
+                state_file=cfg.get("state_file", f"data/{name}_schedule.json"),
+            )
+            logger.info("[%s] expiry=%s | %s", name, expiry.strftime("%Y-%m-%d %H:%M:%S"), reason)
+            if ok:
+                to_run.append(name)
+        except Exception as exc:
+            logger.error("[%s] expiry check failed: %s", name, exc)
+
+    return to_run
+
+
+def main(force: bool = False, keepalive_only: bool = False) -> int:
     load_dotenv(ROOT / ".env")
     config = load_config()
     logger = setup_logger(config.get("logging", {}).get("file", "logs/run.log"))
 
-    schedule = config["schedule"]
-    if not force:
-        ok, reason = should_run(schedule["interval_days"], schedule["state_file"])
-        logger.info(reason)
-        if not ok:
-            return 0
+    if keepalive_only:
+        ok, reason = should_run_keepalive(config)
+        logger.info("keepalive-only: %s", reason)
+        if ok:
+            run_zhihu_keepalive(config)
+        return 0
+
+    providers = resolve_providers_to_run(config, force, logger)
+
+    if not providers:
+        ok, reason = should_run_keepalive(config)
+        logger.info("No cloud renewal due. keepalive: %s", reason)
+        if ok:
+            run_zhihu_keepalive(config)
+        return 0
 
     output_dir = create_output_dir(config.get("output", {}).get("base_dir", "output"))
-    logger.info("输出目录: %s", output_dir)
+    logger.info("Providers to run: %s | output: %s", providers, output_dir)
     started = time.time()
     content: dict | None = None
     result: dict | None = None
 
     try:
-        logger.info("步骤 1/4: AI 生成内容")
+        logger.info("Step 1: AI generate")
         content = generate_content(config)
         save_json(
             output_dir / "content.json",
-            {
-                **content,
-                "topics": config["zhihu"]["topics"],
-                "created_at": datetime.now().isoformat(timespec="seconds"),
-            },
+            {**content, "topics": config["zhihu"]["topics"], "created_at": datetime.now().isoformat(timespec="seconds")},
         )
-        logger.info("标题: %s", content["title"])
 
-        logger.info("步骤 2/4: 知乎发帖")
+        logger.info("Step 2: Zhihu post")
         result = post_zhihu(content["title"], content["body"], config, output_dir)
         save_json(
             output_dir / "content.json",
@@ -71,61 +110,41 @@ def main(force: bool = False) -> int:
                 "created_at": datetime.now().isoformat(timespec="seconds"),
             },
         )
-        logger.info("文章 URL: %s", result["url"])
-        if result.get("screenshot_viewport"):
-            vp = result["screenshot_viewport"]
-            logger.info("截图视口: %sx%s", vp["width"], vp["height"])
+        logger.info("Article URL: %s", result["url"])
 
-        if config.get("sanfeng", {}).get("enabled"):
-            logger.info("步骤 3/4: 三丰云登录并打开续期页")
-            sanfeng_result = submit_sanfeng(result["screenshot_path"], result["url"], config)
-            save_json(output_dir / "sanfeng.json", sanfeng_result)
-            logger.info("三丰云续期页: %s", sanfeng_result.get("form_url", ""))
-        else:
-            logger.info("步骤 3/4: 三丰云已跳过（sanfeng.enabled=false）")
-
-        if config.get("abeiyun", {}).get("enabled"):
-            logger.info("步骤 4/4: 阿贝云登录、进入续期页并填写（人工提交）")
-            abei_result = submit_abeiyun(result["screenshot_path"], result["url"], config)
-            save_json(output_dir / "abeiyun.json", abei_result)
-            logger.info(
-                "阿贝云: 已填表=%s，自动提交=%s，页面=%s",
-                abei_result.get("fill_form"),
-                abei_result.get("submit_form"),
-                abei_result.get("page_url", ""),
+        for idx, provider in enumerate(providers, start=3):
+            logger.info("Step %s: %s renewal", idx, provider)
+            cloud_result = submit_cloud_renewal(
+                provider, result["screenshot_path"], result["url"], config
             )
-        else:
-            logger.info("步骤 4/4: 阿贝云已跳过（abeiyun.enabled=false）")
+            save_json(output_dir / f"{provider}.json", cloud_result)
+
+            expiry_str = cloud_result.get("expiry_at")
+            if expiry_str:
+                expiry = datetime.strptime(expiry_str, "%Y-%m-%d %H:%M:%S")
+                cfg = config[provider]
+                mark_provider_success(
+                    cfg.get("state_file", f"data/{provider}_schedule.json"),
+                    expiry=expiry,
+                    zhihu_url=result["url"],
+                    output_dir=output_dir,
+                )
 
         duration = time.time() - started
         write_meta(output_dir, success=True, duration_sec=duration)
-        mark_success(schedule["state_file"], result["url"], output_dir)
-        logger.info("流程成功，耗时 %.1fs", duration)
+        logger.info("Done in %.1fs", duration)
         return 0
 
     except Exception as exc:
         duration = time.time() - started
         write_meta(output_dir, success=False, duration_sec=duration, error=str(exc))
-        if content:
-            save_json(
-                output_dir / "content.json",
-                {
-                    **content,
-                    "topics": config["zhihu"]["topics"],
-                    "url": result.get("url") if result else "",
-                    "created_at": datetime.now().isoformat(timespec="seconds"),
-                },
-            )
-        logger.error("失败: %s", exc, exc_info=True)
+        logger.error("Failed: %s", exc, exc_info=True)
         return 1
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="三丰云自动续期脚本")
-    parser.add_argument(
-        "--force",
-        action="store_true",
-        help="忽略 5 天间隔限制，立即执行",
-    )
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--force", action="store_true", help="Run all enabled providers now")
+    parser.add_argument("--keepalive-only", action="store_true", help="Only refresh Zhihu session")
     args = parser.parse_args()
-    raise SystemExit(main(force=args.force))
+    raise SystemExit(main(force=args.force, keepalive_only=args.keepalive_only))

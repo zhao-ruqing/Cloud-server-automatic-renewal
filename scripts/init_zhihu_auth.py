@@ -1,4 +1,5 @@
-"""初始化知乎登录态。"""
+# -*- coding: utf-8 -*-
+"""Init Zhihu login state."""
 
 import sys
 from pathlib import Path
@@ -22,15 +23,15 @@ def main() -> None:
     browser_cfg = {**config["browser"], "headless": False, "slow_mo": 0}
 
     print("=" * 55)
-    print("知乎登录态初始化")
+    print("Zhihu login init")
     print("=" * 55)
-    print("1. 将使用系统 Chrome/Edge 打开浏览器（避免空白页）")
-    print("2. 若未登录，请扫码或密码登录")
-    print("3. 登录后请手动打开写文章页，确认页面可正常操作：")
+    print("1. Chrome/Edge will open")
+    print("2. Login if needed")
+    print("3. Open write page and confirm it works:")
     print(f"   {write_url}")
-    print("4. 回到此窗口按 Enter，保存登录 Cookie")
+    print("4. Back here, press Enter to save cookies")
     print("=" * 55)
-    print("提示: 请用 Ctrl+C 取消，不要直接关终端窗口")
+    print("Cancel with Ctrl+C")
     print()
 
     session = None
@@ -41,29 +42,29 @@ def main() -> None:
         try:
             page.goto(write_url, wait_until="domcontentloaded", timeout=60000)
         except Exception as exc:
-            print(f"\n自动打开写文章页时被跳转（可忽略）: {exc}")
-            print("请在浏览器地址栏手动打开写文章页。")
+            print(f"\nAuto navigation interrupted (ok): {exc}")
+            print("Open the write page in the address bar.")
 
-        input("\n确认已在写文章页且页面正常显示后，按 Enter 保存登录态... ")
+        input("\nAfter write page is OK, press Enter to save... ")
 
         current_url = page.url
         if "zhuanlan.zhihu.com/write" not in current_url:
-            print(f"\n警告: 当前不在写文章页 ({current_url})")
-            confirm = input("仍要保存当前 Cookie? [y/N]: ").strip().lower()
+            print(f"\nWarning: not on write page ({current_url})")
+            confirm = input("Save cookies anyway? [y/N]: ").strip().lower()
             if confirm != "y":
-                print("已取消，未保存。")
+                print("Cancelled.")
                 return
 
         session.save_state(zhihu_cfg["auth_state"])
-        print(f"\n已保存: {zhihu_cfg['auth_state']}")
-        print("可运行: python main.py --force")
+        print(f"\nSaved: {zhihu_cfg['auth_state']}")
+        print("Run: python main.py --force")
 
     except KeyboardInterrupt:
-        print("\n\n已取消（未保存）。")
+        print("\n\nCancelled.")
     finally:
         if session:
             session.close()
-            print("浏览器已关闭。")
+            print("Browser closed.")
 
 
 if __name__ == "__main__":
