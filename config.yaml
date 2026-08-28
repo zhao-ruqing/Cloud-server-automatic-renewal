@@ -1,7 +1,7 @@
 schedule:
   mode: expiry
   # Manual:  python main.py
-  # Task:    python main.py --scheduled
+  # Task:    python main.py --scheduled  (Windows task: SanfengCloudAutoRenew, every 2h)
 
 ai:
   api_base: "https://api.deepseek.com/v1"
