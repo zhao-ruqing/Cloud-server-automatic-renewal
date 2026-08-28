@@ -108,8 +108,9 @@ def generate_content(config: dict[str, Any], provider: str) -> dict[str, str]:
                     {
                         "role": "system",
                         "content": (
-                            "\u4f60\u53ea\u80fd\u7528\u7b80\u4f53\u4e2d\u6587\u5199\u4f5c\u3002"
-                            "title \u548c body \u5fc5\u987b\u662f\u7b80\u4f53\u4e2d\u6587\u3002"
+                            "你只能用简体中文写作。title 和 body 必须是简体中文。"
+                            "你是程序员写技术笔记，不是营销文案写手。"
+                            "文章要有开头、1/2/3 分点、结尾，语气真实自然，侧重技术分享。"
                         ),
                     },
                     {"role": "user", "content": prompt},

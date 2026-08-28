@@ -8,8 +8,8 @@ ai:
   api_key_env: "DEEPSEEK_API_KEY"
   model: "deepseek-v4-flash"
   prompt_file: "prompts/article.txt"
-  min_body_length: 100
-  max_body_length: 300
+  min_body_length: 500
+  max_body_length: 800
   max_retries: 3
 
 zhihu:
