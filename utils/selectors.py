@@ -17,6 +17,22 @@ CLOUD = {
 SANFENG = CLOUD
 ABEIYUN = CLOUD
 
+CNBLOGS = {
+    "login_url_contains": "account.cnblogs.com/signin",
+    "username": 'input[formcontrolname="username"]',
+    "password": 'input[formcontrolname="password"]',
+    "login_btn": 'button.action-button:has-text("\u767b\u5f55")',
+    "title_input": "#post-title",
+    "body_editor": "#md-editor",
+    "publish_checkbox": "#isPublished",
+    "publish_btn": '[data-el-locator="publishBtn"]',
+    "saved_page": '[data-el-locator="post-saved-page"]',
+    "saved_title_link": "a.link-post-title",
+    "saved_view_link": 'a:has-text("\u7acb\u5373\u67e5\u770b")',
+    "article_title": "#cb_post_title_url, h1.postTitle, .postTitle",
+    "article_body": "#cnblogs_post_body",
+}
+
 ZHIHU = {
     "title_input": 'textarea[placeholder*="\u8bf7\u8f93\u5165\u6807\u9898"]',
     "body_editor": '.public-DraftEditor-content[contenteditable="true"]',

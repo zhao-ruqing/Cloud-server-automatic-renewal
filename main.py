@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Main entry: expiry-based scheduling + Zhihu post + cloud renewal."""
+"""Main entry: expiry-based scheduling + CNBlogs post + cloud renewal."""
 
 import argparse
 import sys
@@ -15,7 +15,7 @@ sys.path.insert(0, str(ROOT))
 
 from steps.cloud_renewal import fetch_cloud_expiry, submit_cloud_renewal
 from steps.generate_content import generate_content
-from steps.post_zhihu import post_zhihu
+from steps.post_cnblogs import post_cnblogs
 from steps.zhihu_keepalive import run_zhihu_keepalive, should_run_keepalive
 from utils.expiry_scheduler import mark_provider_success, should_run_by_expiry
 from utils.logger import create_output_dir, save_json, setup_logger
@@ -80,7 +80,7 @@ def resolve_providers_to_run(
 
 
 def run_provider_pipeline(provider: str, config: dict, output_dir: Path, logger) -> None:
-    """One provider: generate matching article, post Zhihu, fill only that cloud."""
+    """One provider: generate matching article, post CNBlogs, fill only that cloud."""
     content_cfg = (config.get(provider) or {}).get("content") or {}
     topics = content_cfg.get("topics") or []
     logger.info("[%s] Step 1: AI generate (brand=%s topics=%s)", provider, content_cfg.get("brand_name"), topics)
@@ -97,13 +97,12 @@ def run_provider_pipeline(provider: str, config: dict, output_dir: Path, logger)
     )
     logger.info("[%s] title: %s", provider, content["title"])
 
-    logger.info("[%s] Step 2: Zhihu post", provider)
-    result = post_zhihu(
+    logger.info("[%s] Step 2: CNBlogs post", provider)
+    result = post_cnblogs(
         content["title"],
         content["body"],
         config,
         provider_dir,
-        topics=topics,
         screenshot_name="article.png",
     )
     save_json(
@@ -113,7 +112,6 @@ def run_provider_pipeline(provider: str, config: dict, output_dir: Path, logger)
             "url": result["url"],
             "screenshot_path": result["screenshot_path"],
             "screenshot_viewport": result.get("screenshot_viewport"),
-            "review_hint": result.get("review_hint", ""),
             "created_at": datetime.now().isoformat(timespec="seconds"),
         },
     )
@@ -206,7 +204,7 @@ if __name__ == "__main__":
         choices=CLOUD_PROVIDERS,
         help="Run only this provider (sanfeng or abeiyun)",
     )
-    parser.add_argument("--keepalive-only", action="store_true", help="Only refresh Zhihu session")
+    parser.add_argument("--keepalive-only", action="store_true", help="Only refresh Zhihu session (legacy)")
     args = parser.parse_args()
     raise SystemExit(
         main(

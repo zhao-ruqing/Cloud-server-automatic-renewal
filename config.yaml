@@ -19,9 +19,20 @@ zhihu:
   publish_timeout_sec: 60
   before_publish_delay_sec: 2
   after_publish_delay_sec: 3
-  keepalive_enabled: true
+  keepalive_enabled: false
   keepalive_interval_hours: 2
   keepalive_state_file: "data/zhihu_keepalive.json"
+
+cnblogs:
+  login_url: "https://account.cnblogs.com/signin?returnUrl=https:%2F%2Fi.cnblogs.com%2Farticles%2Fedit"
+  edit_url: "https://i.cnblogs.com/articles/edit"
+  auth_state: "auth/cnblogs_state.json"
+  profile_dir: "cnblogs_profile"
+  username_env: "CNBLOGS_USERNAME"
+  password_env: "CNBLOGS_PASSWORD"
+  login_wait_sec: 3
+  publish_timeout_sec: 60
+  after_publish_delay_sec: 2
 
 sanfeng:
   enabled: true
@@ -39,10 +50,13 @@ sanfeng:
   pause_before_close_sec: 5
   content:
     brand_name: "三丰云"
+    brand_obfuscated: "三\\丰\\云"
+    brand_server_obfuscated: "三\\丰\\云\\服\\务\\器"
     topics:
-      - "三丰云服务器"
+      - "云服务器"
+      - "Linux部署"
     required_keywords:
-      - "三丰云服务器"
+      - "三\\丰\\云\\服\\务\\器"
       - "免费云服务器"
 
 abeiyun:
@@ -61,10 +75,13 @@ abeiyun:
   pause_before_close_sec: 5
   content:
     brand_name: "阿贝云"
+    brand_obfuscated: "阿\\贝\\云"
+    brand_server_obfuscated: "阿\\贝\\云\\服\\务\\器"
     topics:
-      - "阿贝云"
+      - "云服务器"
+      - "Docker"
     required_keywords:
-      - "阿贝云服务器"
+      - "阿\\贝\\云\\服\\务\\器"
       - "免费云服务器"
 
 browser:

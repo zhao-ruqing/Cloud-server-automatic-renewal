@@ -62,8 +62,13 @@ def _render_prompt(template: str, **values: str | int) -> str:
 def _provider_content_cfg(config: dict[str, Any], provider: str) -> dict[str, Any]:
     ai_cfg = config["ai"]
     content = (config.get(provider) or {}).get("content") or {}
+    brand_name = content.get("brand_name") or provider
+    brand_obfuscated = content.get("brand_obfuscated") or brand_name
+    brand_server_obfuscated = content.get("brand_server_obfuscated") or brand_obfuscated
     return {
-        "brand_name": content.get("brand_name") or provider,
+        "brand_name": brand_name,
+        "brand_obfuscated": brand_obfuscated,
+        "brand_server_obfuscated": brand_server_obfuscated,
         "topics": content.get("topics") or [],
         "required_keywords": content.get("required_keywords") or [],
         "prompt_file": content.get("prompt_file") or ai_cfg["prompt_file"],
@@ -90,6 +95,8 @@ def generate_content(config: dict[str, Any], provider: str) -> dict[str, str]:
     prompt = _render_prompt(
         template,
         brand_name=ai_cfg["brand_name"],
+        brand_obfuscated=ai_cfg["brand_obfuscated"],
+        brand_server_obfuscated=ai_cfg["brand_server_obfuscated"],
         keywords=keywords,
         topics=topics,
         min_body_length=ai_cfg["min_body_length"],
@@ -109,7 +116,8 @@ def generate_content(config: dict[str, Any], provider: str) -> dict[str, str]:
                         "role": "system",
                         "content": (
                             "你只能用简体中文写作。title 和 body 必须是简体中文。"
-                            "你是程序员写技术笔记，不是营销文案写手。"
+                            "你是程序员在博客园写技术笔记，不是营销文案写手。"
+                            "品牌名必须用反斜杠分隔字符（如 三\\丰\\云），禁止连续写三丰云/阿贝云。"
                             "文章要有开头、1/2/3 分点、结尾，语气真实自然，侧重技术分享。"
                         ),
                     },
