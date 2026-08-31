@@ -18,7 +18,7 @@ def main() -> None:
     load_dotenv(ROOT / ".env")
     with (ROOT / "config.yaml").open(encoding="utf-8") as f:
         config = yaml.safe_load(f)
-    logger = setup_logger(config.get("logging", {}).get("file", "logs/run.log"))
+    logger = setup_logger(config.get("logging", {}).get("file", "logs/run_{date}.log"))
 
     ok, reason = should_run_keepalive(config)
     logger.info("keepalive check: %s", reason)

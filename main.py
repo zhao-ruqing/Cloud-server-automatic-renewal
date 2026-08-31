@@ -144,7 +144,7 @@ def main(
 ) -> int:
     load_dotenv(ROOT / ".env")
     config = load_config()
-    logger = setup_logger(config.get("logging", {}).get("file", "logs/run.log"))
+    logger = setup_logger(config.get("logging", {}).get("file", "logs/run_{date}.log"))
 
     if keepalive_only:
         ok, reason = should_run_keepalive(config)

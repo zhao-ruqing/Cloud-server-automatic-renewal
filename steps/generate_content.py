@@ -119,6 +119,9 @@ def generate_content(config: dict[str, Any], provider: str) -> dict[str, str]:
                             "你是程序员在博客园写技术笔记，不是营销文案写手。"
                             "品牌名必须用反斜杠分隔字符（如 三\\丰\\云），禁止连续写三丰云/阿贝云。"
                             "文章要有开头、1/2/3 分点、结尾，语气真实自然，侧重技术分享。"
+                            f"硬性限制：body 字数（含标点）必须在 "
+                            f"{ai_cfg['min_body_length']}-{ai_cfg['max_body_length']} 之间，"
+                            "宁短勿长，超字数整篇作废。"
                         ),
                     },
                     {"role": "user", "content": prompt},

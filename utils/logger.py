@@ -8,8 +8,19 @@ from typing import Any
 ROOT = Path(__file__).resolve().parent.parent
 
 
-def setup_logger(log_file: str = "logs/run.log") -> logging.Logger:
-    log_path = ROOT / log_file
+def resolve_log_path(log_file: str = "logs/run_{date}.log") -> Path:
+    """Build daily log path. Supports {date}; bare run.log becomes run_YYYY-MM-DD.log."""
+    today = datetime.now().strftime("%Y-%m-%d")
+    if "{date}" in log_file:
+        resolved = log_file.replace("{date}", today)
+    else:
+        path = Path(log_file)
+        resolved = str(path.with_name(f"{path.stem}_{today}{path.suffix}"))
+    return ROOT / resolved
+
+
+def setup_logger(log_file: str = "logs/run_{date}.log") -> logging.Logger:
+    log_path = resolve_log_path(log_file)
     log_path.parent.mkdir(parents=True, exist_ok=True)
 
     logger = logging.getLogger("sanfeng")

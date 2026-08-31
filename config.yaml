@@ -9,7 +9,7 @@ ai:
   model: "deepseek-v4-flash"
   prompt_file: "prompts/article.txt"
   min_body_length: 500
-  max_body_length: 800
+  max_body_length: 1000
   max_retries: 3
 
 zhihu:
@@ -104,7 +104,8 @@ output:
   base_dir: "output"
 
 logging:
-  file: "logs/run.log"
+  # Daily file: logs/run_YYYY-MM-DD.log ({date} is replaced at runtime)
+  file: "logs/run_{date}.log"
 
 notification:
   email:
