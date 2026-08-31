@@ -105,3 +105,13 @@ output:
 
 logging:
   file: "logs/run.log"
+
+notification:
+  email:
+    enabled: true
+    smtp_host: "smtp.163.com"
+    smtp_port: 465
+    use_ssl: true
+    username_env: "SMTP_USERNAME"
+    password_env: "SMTP_PASSWORD"
+    to_env: "NOTIFY_EMAIL_TO"

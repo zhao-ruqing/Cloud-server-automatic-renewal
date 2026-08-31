@@ -11,15 +11,21 @@ import pyperclip
 from playwright.sync_api import TimeoutError as PlaywrightTimeoutError
 
 from utils.browser import BrowserSession, launch_browser
+from utils.notify import send_cnblogs_failure_email
 from utils.selectors import CNBLOGS
 from utils.viewport import random_viewport
 
 logger = logging.getLogger("sanfeng")
 
 _ARTICLE_URL_RE = re.compile(r"https://www\.cnblogs\.com/[^/]+/articles/\d+")
+_PAGE_ERROR_SELECTORS = (".mat-error", ".error-message", '[role="alert"]')
 
 
 class CnblogsPostError(Exception):
+    pass
+
+
+class CnblogsLoginError(CnblogsPostError):
     pass
 
 
@@ -31,11 +37,65 @@ def _is_login_page(page) -> bool:
     return username.count() > 0 and username.first.is_visible()
 
 
+def _collect_page_errors(page) -> str:
+    errors: list[str] = []
+    for selector in _PAGE_ERROR_SELECTORS:
+        locator = page.locator(selector)
+        for index in range(min(locator.count(), 5)):
+            try:
+                text = locator.nth(index).inner_text(timeout=500).strip()
+            except PlaywrightTimeoutError:
+                continue
+            if text and text not in errors:
+                errors.append(text)
+    return "; ".join(errors)
+
+
+def _failure_screenshot(page, filename: str) -> Path:
+    path = Path("logs") / filename
+    path.parent.mkdir(parents=True, exist_ok=True)
+    page.screenshot(path=str(path), full_page=False)
+    return path
+
+
+def _notify_failure(
+    config: dict[str, Any],
+    *,
+    failure_type: str,
+    reason: str,
+    page=None,
+    screenshot_path: Path | str | None = None,
+    provider: str | None = None,
+    article_title: str | None = None,
+) -> None:
+    page_url = page.url if page else ""
+    page_errors = _collect_page_errors(page) if page else ""
+
+    if screenshot_path is None and page is not None:
+        filename = (
+            "cnblogs_login_failed.png"
+            if failure_type == "login"
+            else "cnblogs_post_failed.png"
+        )
+        screenshot_path = _failure_screenshot(page, filename)
+
+    send_cnblogs_failure_email(
+        config,
+        failure_type=failure_type,
+        reason=reason,
+        page_url=page_url,
+        page_errors=page_errors,
+        screenshot_path=screenshot_path,
+        provider=provider,
+        article_title=article_title,
+    )
+
+
 def _resolve_credentials(cnblogs_cfg: dict[str, Any]) -> tuple[str, str]:
     username = os.environ.get(cnblogs_cfg.get("username_env", "CNBLOGS_USERNAME"), "").strip()
     password = os.environ.get(cnblogs_cfg.get("password_env", "CNBLOGS_PASSWORD"), "").strip()
     if not username or not password:
-        raise CnblogsPostError(
+        raise CnblogsLoginError(
             "CNBlogs credentials empty. Set CNBLOGS_USERNAME/CNBLOGS_PASSWORD in .env "
             "or run: python scripts/init_cnblogs_auth.py"
         )
@@ -63,8 +123,10 @@ def _do_login(page, cnblogs_cfg: dict[str, Any]) -> None:
             timeout=30000,
         )
     except PlaywrightTimeoutError as exc:
-        page.screenshot(path="logs/cnblogs_login_failed.png", full_page=False)
-        raise CnblogsPostError("CNBlogs login timeout (captcha may be required)") from exc
+        _failure_screenshot(page, "cnblogs_login_failed.png")
+        raise CnblogsLoginError(
+            "CNBlogs login timeout (captcha may be required)"
+        ) from exc
 
 
 def _ensure_logged_in(page, cnblogs_cfg: dict[str, Any]) -> None:
@@ -122,7 +184,7 @@ def _wait_after_publish(page, timeout_sec: int) -> None:
             timeout=timeout_sec * 1000,
         )
     except PlaywrightTimeoutError as exc:
-        page.screenshot(path="logs/cnblogs_publish_timeout.png", full_page=False)
+        _failure_screenshot(page, "cnblogs_publish_timeout.png")
         raise CnblogsPostError(f"publish timeout ({timeout_sec}s)") from exc
 
 
@@ -153,7 +215,7 @@ def _navigate_to_published_article(page, title: str) -> None:
         page.wait_for_url("**/www.cnblogs.com/**/articles/**", timeout=30000)
         return
 
-    page.screenshot(path="logs/cnblogs_article_link_not_found.png", full_page=True)
+    _failure_screenshot(page, "cnblogs_article_link_not_found.png")
     raise CnblogsPostError(f"published article link not found for title: {title}")
 
 
@@ -181,16 +243,52 @@ def _screenshot_article_page(
     return final_url, viewport
 
 
+def _handle_post_failure(
+    exc: Exception,
+    *,
+    config: dict[str, Any],
+    page,
+    provider: str | None,
+    article_title: str,
+) -> None:
+    if isinstance(exc, CnblogsLoginError):
+        failure_type = "login"
+    elif isinstance(exc, CnblogsPostError):
+        failure_type = "post"
+    else:
+        failure_type = "post"
+
+    screenshot_path: Path | str | None = None
+    if isinstance(exc, CnblogsPostError) and "publish timeout" in str(exc):
+        screenshot_path = Path("logs/cnblogs_publish_timeout.png")
+    elif isinstance(exc, CnblogsPostError) and "published article link not found" in str(exc):
+        screenshot_path = Path("logs/cnblogs_article_link_not_found.png")
+    elif isinstance(exc, CnblogsLoginError):
+        screenshot_path = Path("logs/cnblogs_login_failed.png")
+
+    _notify_failure(
+        config,
+        failure_type=failure_type,
+        reason=str(exc),
+        page=page,
+        screenshot_path=screenshot_path,
+        provider=provider,
+        article_title=article_title,
+    )
+
+
 def post_cnblogs(
     title: str,
     body: str,
     config: dict[str, Any],
     output_dir: Path,
     screenshot_name: str = "article.png",
+    provider: str | None = None,
 ) -> dict[str, str]:
     cnblogs_cfg = config["cnblogs"]
     browser_cfg = config["browser"]
     session: BrowserSession | None = None
+    page = None
 
     try:
         session = launch_browser(
@@ -204,7 +302,7 @@ def post_cnblogs(
         _ensure_logged_in(page, cnblogs_cfg)
 
         if _is_login_page(page):
-            raise CnblogsPostError("CNBlogs still on login page after auto login")
+            raise CnblogsLoginError("CNBlogs still on login page after auto login")
 
         page.goto(cnblogs_cfg["edit_url"], wait_until="domcontentloaded", timeout=60000)
         page.wait_for_timeout(2000)
@@ -229,6 +327,25 @@ def post_cnblogs(
             "screenshot_path": str(screenshot_path),
             "screenshot_viewport": screenshot_viewport,
         }
+    except (CnblogsLoginError, CnblogsPostError) as exc:
+        _handle_post_failure(
+            exc,
+            config=config,
+            page=page,
+            provider=provider,
+            article_title=title,
+        )
+        raise
+    except Exception as exc:
+        wrapped = CnblogsPostError(str(exc))
+        _handle_post_failure(
+            wrapped,
+            config=config,
+            page=page,
+            provider=provider,
+            article_title=title,
+        )
+        raise wrapped from exc
     finally:
         if session:
             session.save_state(cnblogs_cfg["auth_state"])

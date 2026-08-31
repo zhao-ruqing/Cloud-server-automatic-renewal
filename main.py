@@ -104,6 +104,7 @@ def run_provider_pipeline(provider: str, config: dict, output_dir: Path, logger)
         config,
         provider_dir,
         screenshot_name="article.png",
+        provider=provider,
     )
     save_json(
         provider_dir / "content.json",
