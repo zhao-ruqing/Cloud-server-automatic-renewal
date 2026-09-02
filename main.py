@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Main entry: expiry-based scheduling + CNBlogs post + cloud renewal."""
+"""Main entry: expiry-based scheduling + Zhihu post + cloud renewal."""
 
 import argparse
 import sys
@@ -15,10 +15,17 @@ sys.path.insert(0, str(ROOT))
 
 from steps.cloud_renewal import fetch_cloud_expiry, submit_cloud_renewal
 from steps.generate_content import generate_content
-from steps.post_cnblogs import post_cnblogs
+from steps.post_zhihu import post_zhihu
 from steps.zhihu_keepalive import run_zhihu_keepalive, should_run_keepalive
-from utils.expiry_scheduler import mark_provider_success, should_run_by_expiry
-from utils.logger import create_output_dir, save_json, setup_logger
+from utils.expiry_scheduler import (
+    hours_until,
+    mark_audit_warned,
+    mark_provider_success,
+    should_run_by_expiry,
+    should_warn_audit_stale,
+)
+from utils.logger import ROOT as DATA_ROOT, create_output_dir, load_json, save_json, setup_logger
+from utils.notify import send_audit_stale_email
 from utils.scheduler import write_meta
 
 CLOUD_PROVIDERS = ("sanfeng", "abeiyun")
@@ -27,6 +34,45 @@ CLOUD_PROVIDERS = ("sanfeng", "abeiyun")
 def load_config(path: Path | None = None) -> dict:
     with (path or ROOT / "config.yaml").open(encoding="utf-8") as f:
         return yaml.safe_load(f)
+
+
+def _maybe_send_audit_warn(
+    provider: str,
+    config: dict,
+    expiry: datetime,
+    logger,
+) -> None:
+    cfg = config.get(provider, {})
+    hours_before = float(
+        cfg.get(
+            "audit_warn_hours_before",
+            config.get("schedule", {}).get("audit_warn_hours_before", 5),
+        )
+    )
+    state_file = cfg.get("state_file", f"data/{provider}_schedule.json")
+    ok, reason = should_warn_audit_stale(
+        expiry,
+        hours_before=hours_before,
+        state_file=state_file,
+    )
+    logger.info("[%s] audit-check: %s", provider, reason)
+    if not ok:
+        return
+
+    state = load_json(DATA_ROOT / state_file)
+    sent = send_audit_stale_email(
+        config,
+        provider=provider,
+        expiry=expiry,
+        hours_remaining=hours_until(expiry),
+        last_success_at=str(state.get("last_success_at") or ""),
+        last_url=str(state.get("last_url") or ""),
+    )
+    if sent:
+        mark_audit_warned(state_file, expiry)
+        logger.info("[%s] audit stale email sent", provider)
+    else:
+        logger.warning("[%s] audit stale email not sent (smtp disabled/missing)", provider)
 
 
 def resolve_providers_to_run(
@@ -73,6 +119,8 @@ def resolve_providers_to_run(
             )
             if ok:
                 to_run.append(name)
+            else:
+                _maybe_send_audit_warn(name, config, expiry, logger)
         except Exception as exc:
             logger.error("[%s] expiry check failed: %s", name, exc)
 
@@ -80,10 +128,17 @@ def resolve_providers_to_run(
 
 
 def run_provider_pipeline(provider: str, config: dict, output_dir: Path, logger) -> None:
-    """One provider: generate matching article, post CNBlogs, fill only that cloud."""
+    """One provider: generate matching article, post Zhihu, fill only that cloud."""
     content_cfg = (config.get(provider) or {}).get("content") or {}
+    zhihu_topics = content_cfg.get("zhihu_topics") or []
     topics = content_cfg.get("topics") or []
-    logger.info("[%s] Step 1: AI generate (brand=%s topics=%s)", provider, content_cfg.get("brand_name"), topics)
+    logger.info(
+        "[%s] Step 1: AI generate (brand=%s topics=%s zhihu_topics=%s)",
+        provider,
+        content_cfg.get("brand_name"),
+        topics,
+        zhihu_topics,
+    )
 
     content = generate_content(config, provider)
     provider_dir = output_dir / provider
@@ -97,12 +152,13 @@ def run_provider_pipeline(provider: str, config: dict, output_dir: Path, logger)
     )
     logger.info("[%s] title: %s", provider, content["title"])
 
-    logger.info("[%s] Step 2: CNBlogs post", provider)
-    result = post_cnblogs(
+    logger.info("[%s] Step 2: Zhihu post", provider)
+    result = post_zhihu(
         content["title"],
         content["body"],
         config,
         provider_dir,
+        topics=zhihu_topics,
         screenshot_name="article.png",
         provider=provider,
     )
@@ -113,6 +169,7 @@ def run_provider_pipeline(provider: str, config: dict, output_dir: Path, logger)
             "url": result["url"],
             "screenshot_path": result["screenshot_path"],
             "screenshot_viewport": result.get("screenshot_viewport"),
+            "review_hint": result.get("review_hint", ""),
             "created_at": datetime.now().isoformat(timespec="seconds"),
         },
     )
@@ -205,7 +262,11 @@ if __name__ == "__main__":
         choices=CLOUD_PROVIDERS,
         help="Run only this provider (sanfeng or abeiyun)",
     )
-    parser.add_argument("--keepalive-only", action="store_true", help="Only refresh Zhihu session (legacy)")
+    parser.add_argument(
+        "--keepalive-only",
+        action="store_true",
+        help="Only refresh Zhihu session",
+    )
     args = parser.parse_args()
     raise SystemExit(
         main(

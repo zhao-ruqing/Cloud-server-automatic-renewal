@@ -13,9 +13,14 @@ from typing import Any
 
 logger = logging.getLogger("sanfeng")
 
+_PROVIDER_LABELS = {
+    "sanfeng": "三丰云",
+    "abeiyun": "阿贝云",
+}
+
 _FAILURE_LABELS = {
-    "login": "博客园登录失败",
-    "post": "博客园发帖失败",
+    "login": "知乎登录失败",
+    "post": "知乎发帖失败",
 }
 
 
@@ -44,58 +49,15 @@ def _resolve_email_config(config: dict[str, Any]) -> dict[str, Any] | None:
     }
 
 
-def send_cnblogs_failure_email(
-    config: dict[str, Any],
+def _send_email(
+    smtp_cfg: dict[str, Any],
     *,
-    failure_type: str,
-    reason: str,
-    page_url: str = "",
-    page_errors: str = "",
+    subject: str,
+    body: str,
     screenshot_path: str | Path | None = None,
-    provider: str | None = None,
-    article_title: str | None = None,
 ) -> bool:
-    """Send failure notification email. Returns True if sent."""
-    smtp_cfg = _resolve_email_config(config)
-    if not smtp_cfg:
-        return False
-
-    label = _FAILURE_LABELS.get(failure_type, "博客园操作失败")
-    now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-
-    lines = [
-        f"【{label}】需人工处理",
-        "",
-        f"时间：{now}",
-    ]
-    if provider:
-        lines.append(f"云厂商：{provider}")
-    if article_title:
-        lines.append(f"文章标题：{article_title}")
-    lines.extend(
-        [
-            f"失败原因：{reason}",
-        ]
-    )
-    if page_errors:
-        lines.append(f"页面错误：{page_errors}")
-    if page_url:
-        lines.append(f"当前 URL：{page_url}")
-    if screenshot_path:
-        lines.append(f"截图：{screenshot_path}")
-    lines.extend(
-        [
-            "",
-            "建议操作：",
-            "1. 检查博客园登录态是否正常",
-            "2. 如有验证码，手动登录后运行: python scripts/init_cnblogs_auth.py",
-            "3. 处理完成后可用 --force --provider <name> 重跑",
-        ]
-    )
-    body = "\n".join(lines)
-
     msg = MIMEMultipart()
-    msg["Subject"] = f"[云续期脚本] {label}"
+    msg["Subject"] = subject
     msg["From"] = smtp_cfg["username"]
     msg["To"] = smtp_cfg["to"]
     msg.attach(MIMEText(body, "plain", "utf-8"))
@@ -119,8 +81,160 @@ def send_cnblogs_failure_email(
                 server.starttls()
                 server.login(smtp_cfg["username"], smtp_cfg["password"])
                 server.send_message(msg)
-        logger.info("Failure notification email sent to %s", smtp_cfg["to"])
+        logger.info("Notification email sent to %s: %s", smtp_cfg["to"], subject)
         return True
     except Exception as exc:
         logger.error("Failed to send notification email: %s", exc)
         return False
+
+
+def send_zhihu_failure_email(
+    config: dict[str, Any],
+    *,
+    failure_type: str,
+    reason: str,
+    page_url: str = "",
+    page_errors: str = "",
+    screenshot_path: str | Path | None = None,
+    provider: str | None = None,
+    article_title: str | None = None,
+) -> bool:
+    """Send Zhihu login/post failure notification. Returns True if sent."""
+    smtp_cfg = _resolve_email_config(config)
+    if not smtp_cfg:
+        return False
+
+    label = _FAILURE_LABELS.get(failure_type, "知乎操作失败")
+    now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    provider_label = _PROVIDER_LABELS.get(provider or "", provider or "")
+
+    lines = [
+        f"【{label}】需人工处理",
+        "",
+        f"时间：{now}",
+    ]
+    if provider_label:
+        lines.append(f"云厂商：{provider_label}")
+    if article_title:
+        lines.append(f"文章标题：{article_title}")
+    lines.append(f"失败原因：{reason}")
+    if page_errors:
+        lines.append(f"页面错误：{page_errors}")
+    if page_url:
+        lines.append(f"当前 URL：{page_url}")
+    if screenshot_path:
+        lines.append(f"截图：{screenshot_path}")
+    lines.extend(
+        [
+            "",
+            "建议操作：",
+            "1. 检查知乎登录态是否正常",
+            "2. 如需重新登录，运行: python scripts/init_zhihu_auth.py",
+            "3. 处理完成后可用 --force --provider <name> 重跑",
+        ]
+    )
+
+    return _send_email(
+        smtp_cfg,
+        subject=f"[云续期脚本] {label}",
+        body="\n".join(lines),
+        screenshot_path=screenshot_path,
+    )
+
+
+def send_audit_stale_email(
+    config: dict[str, Any],
+    *,
+    provider: str,
+    expiry: datetime,
+    hours_remaining: float,
+    last_success_at: str = "",
+    last_url: str = "",
+) -> bool:
+    """Notify that cloud expiry has not changed near deadline (possible rejected audit)."""
+    smtp_cfg = _resolve_email_config(config)
+    if not smtp_cfg:
+        return False
+
+    provider_label = _PROVIDER_LABELS.get(provider, provider)
+    expiry_str = expiry.strftime("%Y-%m-%d %H:%M:%S")
+    now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    label = f"{provider_label}到期时间未更新"
+
+    lines = [
+        f"【{label}】可能审核未通过，需人工处理",
+        "",
+        f"时间：{now}",
+        f"云厂商：{provider_label}",
+        f"当前到期时间：{expiry_str}",
+        f"距离到期：{hours_remaining:.1f} 小时",
+    ]
+    if last_success_at:
+        lines.append(f"本周期提交时间：{last_success_at}")
+    if last_url:
+        lines.append(f"提交的文章 URL：{last_url}")
+    lines.extend(
+        [
+            "",
+            "说明：本周期已自动提交续期，但到期时间仍未变化。",
+            "可能原因：审核未通过 / 表单被驳回 / 需人工补交。",
+            "",
+            "建议：登录云控制台核对审核状态，必要时手动重新发帖并提交。",
+        ]
+    )
+
+    return _send_email(
+        smtp_cfg,
+        subject=f"[云续期脚本] {label}",
+        body="\n".join(lines),
+    )
+
+
+def send_cnblogs_failure_email(
+    config: dict[str, Any],
+    *,
+    failure_type: str,
+    reason: str,
+    page_url: str = "",
+    page_errors: str = "",
+    screenshot_path: str | Path | None = None,
+    provider: str | None = None,
+    article_title: str | None = None,
+) -> bool:
+    """Legacy CNBlogs failure mail (kept for post_cnblogs.py)."""
+    smtp_cfg = _resolve_email_config(config)
+    if not smtp_cfg:
+        return False
+
+    labels = {"login": "博客园登录失败", "post": "博客园发帖失败"}
+    label = labels.get(failure_type, "博客园操作失败")
+    now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    provider_label = _PROVIDER_LABELS.get(provider or "", provider or "")
+
+    lines = [f"【{label}】需人工处理", "", f"时间：{now}"]
+    if provider_label:
+        lines.append(f"云厂商：{provider_label}")
+    if article_title:
+        lines.append(f"文章标题：{article_title}")
+    lines.append(f"失败原因：{reason}")
+    if page_errors:
+        lines.append(f"页面错误：{page_errors}")
+    if page_url:
+        lines.append(f"当前 URL：{page_url}")
+    if screenshot_path:
+        lines.append(f"截图：{screenshot_path}")
+    lines.extend(
+        [
+            "",
+            "建议操作：",
+            "1. 检查博客园登录态是否正常",
+            "2. 如有验证码，手动登录后运行: python scripts/init_cnblogs_auth.py",
+            "3. 处理完成后可用 --force --provider <name> 重跑",
+        ]
+    )
+    return _send_email(
+        smtp_cfg,
+        subject=f"[云续期脚本] {label}",
+        body="\n".join(lines),
+        screenshot_path=screenshot_path,
+    )

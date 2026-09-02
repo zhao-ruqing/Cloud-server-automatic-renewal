@@ -81,5 +81,47 @@ def mark_provider_success(
             "last_expiry_at": expiry.strftime("%Y-%m-%d %H:%M:%S"),
             "last_url": zhihu_url,
             "last_output_dir": str(output_dir.relative_to(ROOT)),
+            # Clear previous cycle's audit warning when a new submit succeeds.
+            "audit_warned_for_expiry": "",
         },
     )
+
+
+def should_warn_audit_stale(
+    expiry: datetime,
+    *,
+    hours_before: float,
+    state_file: str,
+) -> tuple[bool, str]:
+    """True when already submitted this cycle but expiry still unchanged near deadline."""
+    remaining = hours_until(expiry)
+    expiry_key = expiry.strftime("%Y-%m-%d %H:%M:%S")
+    state = load_json(ROOT / state_file)
+
+    if not state.get("last_success_at"):
+        return False, "no prior success in state, skip audit warn"
+    if state.get("last_expiry_at") != expiry_key:
+        return False, (
+            f"expiry changed ({state.get('last_expiry_at')} -> {expiry_key}), "
+            "audit likely passed"
+        )
+    if remaining > hours_before:
+        return False, (
+            f"{remaining:.1f}h until expiry, audit warn only within "
+            f"{hours_before}h"
+        )
+    if state.get("audit_warned_for_expiry") == expiry_key:
+        return False, f"audit warn already sent for expiry {expiry_key}"
+
+    return True, (
+        f"{remaining:.1f}h until expiry, submitted but expiry unchanged, warn once"
+    )
+
+
+def mark_audit_warned(state_file: str, expiry: datetime) -> None:
+    path = ROOT / state_file
+    state = load_json(path)
+    state["audit_warned_for_expiry"] = expiry.strftime("%Y-%m-%d %H:%M:%S")
+    state["audit_warned_at"] = datetime.now().isoformat(timespec="seconds")
+    path.parent.mkdir(parents=True, exist_ok=True)
+    save_json(path, state)

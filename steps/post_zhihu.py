@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """Zhihu publish flow."""
 
+import logging
 import time
 from pathlib import Path
 from typing import Any
@@ -9,11 +10,18 @@ import pyperclip
 from playwright.sync_api import TimeoutError as PlaywrightTimeoutError
 
 from utils.browser import BrowserSession, launch_browser
+from utils.notify import send_zhihu_failure_email
 from utils.selectors import ZHIHU
 from utils.viewport import random_viewport
 
+logger = logging.getLogger("sanfeng")
+
 
 class ZhihuPostError(Exception):
+    pass
+
+
+class ZhihuLoginError(ZhihuPostError):
     pass
 
 
@@ -26,6 +34,79 @@ def _is_login_required(page) -> bool:
     if page.locator(".SignFlowModal").count() > 0:
         return True
     return False
+
+
+def _failure_screenshot(page, filename: str) -> Path:
+    path = Path("logs") / filename
+    path.parent.mkdir(parents=True, exist_ok=True)
+    page.screenshot(path=str(path), full_page=False)
+    return path
+
+
+def _notify_failure(
+    config: dict[str, Any],
+    *,
+    failure_type: str,
+    reason: str,
+    page=None,
+    screenshot_path: Path | str | None = None,
+    provider: str | None = None,
+    article_title: str | None = None,
+) -> None:
+    page_url = page.url if page else ""
+    if screenshot_path is None and page is not None:
+        filename = (
+            "zhihu_login_failed.png"
+            if failure_type == "login"
+            else "zhihu_post_failed.png"
+        )
+        try:
+            screenshot_path = _failure_screenshot(page, filename)
+        except Exception as exc:
+            logger.warning("Failed to capture Zhihu failure screenshot: %s", exc)
+
+    send_zhihu_failure_email(
+        config,
+        failure_type=failure_type,
+        reason=reason,
+        page_url=page_url,
+        screenshot_path=screenshot_path,
+        provider=provider,
+        article_title=article_title,
+    )
+
+
+def _handle_post_failure(
+    exc: Exception,
+    *,
+    config: dict[str, Any],
+    page,
+    provider: str | None,
+    article_title: str,
+) -> None:
+    if isinstance(exc, ZhihuLoginError):
+        failure_type = "login"
+    else:
+        failure_type = "post"
+
+    screenshot_path: Path | str | None = None
+    reason = str(exc)
+    if isinstance(exc, ZhihuPostError) and "publish timeout" in reason:
+        screenshot_path = Path("logs/publish_timeout.png")
+    elif isinstance(exc, ZhihuPostError) and "topic not found" in reason:
+        screenshot_path = Path("logs/topic_not_found.png")
+    elif isinstance(exc, ZhihuLoginError):
+        screenshot_path = Path("logs/zhihu_login_failed.png")
+
+    _notify_failure(
+        config,
+        failure_type=failure_type,
+        reason=reason,
+        page=page,
+        screenshot_path=screenshot_path,
+        provider=provider,
+        article_title=article_title,
+    )
 
 
 def _fill_title(page, title: str) -> None:
@@ -141,11 +222,13 @@ def post_zhihu(
     output_dir: Path,
     topics: list[str] | None = None,
     screenshot_name: str = "article.png",
+    provider: str | None = None,
 ) -> dict[str, str]:
     zhihu_cfg = config["zhihu"]
     browser_cfg = config["browser"]
     topic_list = topics if topics is not None else []
     session: BrowserSession | None = None
+    page = None
 
     try:
         session = launch_browser(
@@ -158,7 +241,11 @@ def post_zhihu(
         page.wait_for_timeout(2000)
 
         if _is_login_required(page):
-            raise ZhihuPostError("Zhihu login expired. Run: python scripts/init_zhihu_auth.py")
+            shot = _failure_screenshot(page, "zhihu_login_failed.png")
+            raise ZhihuLoginError(
+                "Zhihu login expired. Run: python scripts/init_zhihu_auth.py "
+                f"(screenshot: {shot})"
+            )
 
         _fill_title(page, title)
         _fill_body(page, body)
@@ -187,6 +274,25 @@ def post_zhihu(
             "screenshot_viewport": screenshot_viewport,
             "review_hint": review_hint,
         }
+    except (ZhihuLoginError, ZhihuPostError) as exc:
+        _handle_post_failure(
+            exc,
+            config=config,
+            page=page,
+            provider=provider,
+            article_title=title,
+        )
+        raise
+    except Exception as exc:
+        wrapped = ZhihuPostError(str(exc))
+        _handle_post_failure(
+            wrapped,
+            config=config,
+            page=page,
+            provider=provider,
+            article_title=title,
+        )
+        raise wrapped from exc
     finally:
         if session:
             session.save_state(zhihu_cfg["auth_state"])

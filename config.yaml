@@ -2,6 +2,8 @@ schedule:
   mode: expiry
   # Manual:  python main.py
   # Task:    python main.py --scheduled  (Windows task: SanfengCloudAutoRenew, every 2h)
+  # After submit, if expiry still unchanged within this many hours before deadline → email once
+  audit_warn_hours_before: 5
 
 ai:
   api_base: "https://api.deepseek.com/v1"
@@ -19,7 +21,7 @@ zhihu:
   publish_timeout_sec: 60
   before_publish_delay_sec: 2
   after_publish_delay_sec: 3
-  keepalive_enabled: false
+  keepalive_enabled: true
   keepalive_interval_hours: 2
   keepalive_state_file: "data/zhihu_keepalive.json"
 
@@ -50,13 +52,15 @@ sanfeng:
   pause_before_close_sec: 5
   content:
     brand_name: "三丰云"
-    brand_obfuscated: "三\\丰\\云"
-    brand_server_obfuscated: "三\\丰\\云\\服\\务\\器"
+    brand_obfuscated: "三丰云"
+    brand_server_obfuscated: "三丰云服务器"
     topics:
       - "云服务器"
       - "Linux部署"
+    zhihu_topics:
+      - "三丰云服务器"
     required_keywords:
-      - "三\\丰\\云\\服\\务\\器"
+      - "三丰云服务器"
       - "免费云服务器"
 
 abeiyun:
@@ -75,13 +79,15 @@ abeiyun:
   pause_before_close_sec: 5
   content:
     brand_name: "阿贝云"
-    brand_obfuscated: "阿\\贝\\云"
-    brand_server_obfuscated: "阿\\贝\\云\\服\\务\\器"
+    brand_obfuscated: "阿贝云"
+    brand_server_obfuscated: "阿贝云服务器"
     topics:
       - "云服务器"
       - "Docker"
+    zhihu_topics:
+      - "阿贝云"
     required_keywords:
-      - "阿\\贝\\云\\服\\务\\器"
+      - "阿贝云服务器"
       - "免费云服务器"
 
 browser:
