@@ -49,6 +49,7 @@ sanfeng:
   run_hours_before_max: 23
   login_wait_sec: 2
   form_load_wait_sec: 3
+  expiry_load_timeout_sec: 30
   pause_before_close_sec: 5
   content:
     brand_name: "三丰云"
@@ -76,6 +77,7 @@ abeiyun:
   run_hours_before_max: 23
   login_wait_sec: 2
   form_load_wait_sec: 3
+  expiry_load_timeout_sec: 30
   pause_before_close_sec: 5
   content:
     brand_name: "阿贝云"

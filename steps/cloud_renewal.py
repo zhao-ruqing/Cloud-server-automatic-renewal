@@ -2,6 +2,7 @@
 """Shared cloud renewal: login, read expiry, fill renewal form."""
 
 import logging
+import time
 from datetime import datetime
 from pathlib import Path
 from typing import Any
@@ -49,14 +50,13 @@ def _do_login(page: Page, wait_sec: float, provider: str) -> None:
         raise CloudRenewalError(f"{provider} login timeout") from exc
 
 
-def read_expiry_from_page(page: Page) -> datetime:
+def _parse_expiry_once(page: Page) -> datetime | None:
     label = CLOUD["expiry_label"]
 
     # Prefer datetime immediately after the "expiry" label (not "created at").
     body_text = page.locator("body").inner_text()
     expiry = parse_expiry_after_label(body_text, label)
     if expiry:
-        logger.info("Parsed expiry after label: %s", expiry.strftime("%Y-%m-%d %H:%M:%S"))
         return expiry
 
     labels = page.get_by_text(label, exact=False)
@@ -70,13 +70,33 @@ def read_expiry_from_page(page: Page) -> datetime:
             if next_col.count() > 0:
                 expiry = parse_expiry_datetime(next_col.first.inner_text(timeout=3000))
                 if expiry:
-                    logger.info(
-                        "Parsed expiry from next column: %s",
-                        expiry.strftime("%Y-%m-%d %H:%M:%S"),
-                    )
                     return expiry
         except Exception:
             continue
+    return None
+
+
+def read_expiry_from_page(page: Page, timeout_sec: float = 30) -> datetime:
+    """Wait until the expiry datetime is rendered, then parse it."""
+    deadline = time.monotonic() + max(float(timeout_sec), 0)
+    waiting_logged = False
+    while True:
+        expiry = _parse_expiry_once(page)
+        if expiry:
+            logger.info(
+                "Parsed expiry after label: %s",
+                expiry.strftime("%Y-%m-%d %H:%M:%S"),
+            )
+            return expiry
+        if time.monotonic() >= deadline:
+            break
+        if not waiting_logged:
+            logger.info(
+                "Expiry datetime not ready yet, waiting up to %.0fs",
+                timeout_sec,
+            )
+            waiting_logged = True
+        page.wait_for_timeout(500)
 
     page.screenshot(path="logs/expiry_not_found.png", full_page=False)
     raise CloudRenewalError("Expiry datetime not found after label")
@@ -99,7 +119,10 @@ def fetch_cloud_expiry(provider_cfg: dict[str, Any], browser_cfg: dict[str, Any]
         server_url = provider_cfg["server_url"]
         page.goto(server_url, wait_until="domcontentloaded", timeout=60000)
         page.wait_for_timeout(int(provider_cfg.get("form_load_wait_sec", 3) * 1000))
-        expiry = read_expiry_from_page(page)
+        expiry = read_expiry_from_page(
+            page,
+            timeout_sec=provider_cfg.get("expiry_load_timeout_sec", 30),
+        )
         session.save_state(provider_cfg["auth_state"])
         return expiry
     finally:
@@ -182,7 +205,10 @@ def submit_cloud_renewal(
         page.goto(server_url, wait_until="domcontentloaded", timeout=60000)
         page.wait_for_timeout(int(provider_cfg.get("form_load_wait_sec", 3) * 1000))
 
-        expiry = read_expiry_from_page(page)
+        expiry = read_expiry_from_page(
+            page,
+            timeout_sec=provider_cfg.get("expiry_load_timeout_sec", 30),
+        )
         form_filled = False
         if provider_cfg.get("fill_form", True):
             _fill_renewal_form(page, screenshot_path, zhihu_url)
