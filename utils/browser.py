@@ -21,7 +21,6 @@ def resolve_chrome_executable(browser_cfg: dict[str, Any]) -> Path | None:
         path = Path(configured)
         if path.exists():
             return path
-        raise RuntimeError(f"Chrome path not found: {path}")
 
     for path in DEFAULT_CHROME_PATHS:
         if path.exists():

@@ -95,6 +95,7 @@ abeiyun:
 browser:
   headless: false
   slow_mo: 100
+  # If this path is missing, the script auto-detects Chrome / Edge.
   executable_path: "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe"
   args:
     - "--disable-blink-features=AutomationControlled"
