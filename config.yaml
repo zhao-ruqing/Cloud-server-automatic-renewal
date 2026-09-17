@@ -16,6 +16,7 @@ ai:
 
 zhihu:
   write_url: "https://zhuanlan.zhihu.com/write"
+  login_url: "https://www.zhihu.com/signin?next=%2F"
   auth_state: "auth/zhihu_state.json"
   profile_dir: "zhihu_profile"
   publish_timeout_sec: 60
@@ -24,6 +25,10 @@ zhihu:
   keepalive_enabled: true
   keepalive_interval_hours: 2
   keepalive_state_file: "data/zhihu_keepalive.json"
+  relogin_poll_sec: 20
+  relogin_email_interval_minutes: 10
+  relogin_wait_max_hours: 12
+  relogin_state_file: "data/zhihu_relogin.json"
 
 cnblogs:
   login_url: "https://account.cnblogs.com/signin?returnUrl=https:%2F%2Fi.cnblogs.com%2Farticles%2Fedit"
@@ -45,8 +50,8 @@ sanfeng:
   auth_state: "auth/sanfeng_state.json"
   profile_dir: "sanfeng_profile"
   state_file: "data/sanfeng_schedule.json"
-  run_hours_before_min: 10
-  run_hours_before_max: 23
+  run_hours_before_min: 0
+  run_hours_before_max: 26
   login_wait_sec: 2
   form_load_wait_sec: 3
   expiry_load_timeout_sec: 30
@@ -73,8 +78,8 @@ abeiyun:
   auth_state: "auth/abeiyun_state.json"
   profile_dir: "abeiyun_profile"
   state_file: "data/abeiyun_schedule.json"
-  run_hours_before_min: 10
-  run_hours_before_max: 23
+  run_hours_before_min: 0
+  run_hours_before_max: 26
   login_wait_sec: 2
   form_load_wait_sec: 3
   expiry_load_timeout_sec: 30
@@ -113,8 +118,8 @@ output:
   base_dir: "output"
 
 logging:
-  # Daily file: logs/run_YYYY-MM-DD.log ({date} is replaced at runtime)
-  file: "logs/run_{date}.log"
+  # Monthly dir + daily file: logs/2026-09/run_2026-09-17.log
+  file: "logs/{year_month}/run_{date}.log"
 
 notification:
   email:

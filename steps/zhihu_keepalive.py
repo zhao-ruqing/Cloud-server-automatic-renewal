@@ -7,15 +7,19 @@ from typing import Any
 
 from utils.browser import BrowserSession, launch_browser
 from utils.logger import ROOT, load_json, save_json
-from utils.selectors import ZHIHU
+from steps.zhihu_relogin import is_zhihu_login_required, wait_for_zhihu_login
 
 logger = logging.getLogger("sanfeng")
 
 
-def should_run_keepalive(config: dict[str, Any]) -> tuple[bool, str]:
+def should_run_keepalive(
+    config: dict[str, Any], *, force: bool = False
+) -> tuple[bool, str]:
     zhihu_cfg = config.get("zhihu", {})
     if not zhihu_cfg.get("keepalive_enabled", True):
         return False, "keepalive disabled"
+    if force:
+        return True, "force mode (ignore keepalive interval)"
 
     interval = zhihu_cfg.get("keepalive_interval_hours", 2)
     state_file = zhihu_cfg.get("keepalive_state_file", "data/zhihu_keepalive.json")
@@ -33,7 +37,7 @@ def should_run_keepalive(config: dict[str, Any]) -> tuple[bool, str]:
 
 def run_zhihu_keepalive(config: dict[str, Any]) -> dict[str, Any]:
     zhihu_cfg = config["zhihu"]
-    browser_cfg = config["browser"]
+    browser_cfg = {**config["browser"], "headless": False}
     state_file = zhihu_cfg.get("keepalive_state_file", "data/zhihu_keepalive.json")
 
     session: BrowserSession | None = None
@@ -52,10 +56,16 @@ def run_zhihu_keepalive(config: dict[str, Any]) -> dict[str, Any]:
             page.goto(url, wait_until="domcontentloaded", timeout=60000)
             page.wait_for_timeout(2000)
 
-        login_required = (
-            "signin" in page.url
-            or page.locator(f'text="{ZHIHU["login_text"]}"').count() > 0
-        )
+        login_required = is_zhihu_login_required(page)
+        if login_required:
+            logger.warning("Zhihu keepalive: login expired, waiting for QR scan")
+            ok = wait_for_zhihu_login(session, config)
+            login_required = not ok
+            if ok:
+                page.goto("https://www.zhihu.com/", wait_until="domcontentloaded", timeout=60000)
+                page.wait_for_timeout(1500)
+                login_required = is_zhihu_login_required(page)
+
         session.save_state(zhihu_cfg["auth_state"])
 
         result = {
@@ -66,7 +76,7 @@ def run_zhihu_keepalive(config: dict[str, Any]) -> dict[str, Any]:
         }
         save_json(ROOT / state_file, result)
         if login_required:
-            logger.warning("Zhihu keepalive: login expired, run init_zhihu_auth.py")
+            logger.warning("Zhihu keepalive: still logged out after QR wait")
         else:
             logger.info("Zhihu keepalive ok: %s", page.url)
         return result

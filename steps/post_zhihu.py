@@ -10,8 +10,10 @@ import pyperclip
 from playwright.sync_api import TimeoutError as PlaywrightTimeoutError
 
 from utils.browser import BrowserSession, launch_browser
+from utils.logger import log_artifact_path
 from utils.notify import send_zhihu_failure_email
 from utils.selectors import ZHIHU
+from steps.zhihu_relogin import is_zhihu_login_required, wait_for_zhihu_login
 from utils.viewport import random_viewport
 
 logger = logging.getLogger("sanfeng")
@@ -22,23 +24,13 @@ class ZhihuPostError(Exception):
 
 
 class ZhihuLoginError(ZhihuPostError):
-    pass
-
-
-def _is_login_required(page) -> bool:
-    url = page.url
-    if "signin" in url or "login" in url:
-        return True
-    if page.locator(f'text="{ZHIHU["login_text"]}"').count() > 0:
-        return True
-    if page.locator(".SignFlowModal").count() > 0:
-        return True
-    return False
+    def __init__(self, message: str, *, already_notified: bool = False):
+        super().__init__(message)
+        self.already_notified = already_notified
 
 
 def _failure_screenshot(page, filename: str) -> Path:
-    path = Path("logs") / filename
-    path.parent.mkdir(parents=True, exist_ok=True)
+    path = log_artifact_path(filename)
     page.screenshot(path=str(path), full_page=False)
     return path
 
@@ -84,6 +76,10 @@ def _handle_post_failure(
     provider: str | None,
     article_title: str,
 ) -> None:
+    if getattr(exc, "already_notified", False):
+        logger.info("Zhihu login failure already emailed during QR wait")
+        return
+
     if isinstance(exc, ZhihuLoginError):
         failure_type = "login"
     else:
@@ -92,11 +88,11 @@ def _handle_post_failure(
     screenshot_path: Path | str | None = None
     reason = str(exc)
     if isinstance(exc, ZhihuPostError) and "publish timeout" in reason:
-        screenshot_path = Path("logs/publish_timeout.png")
+        screenshot_path = log_artifact_path("publish_timeout.png")
     elif isinstance(exc, ZhihuPostError) and "topic not found" in reason:
-        screenshot_path = Path("logs/topic_not_found.png")
+        screenshot_path = log_artifact_path("topic_not_found.png")
     elif isinstance(exc, ZhihuLoginError):
-        screenshot_path = Path("logs/zhihu_login_failed.png")
+        screenshot_path = log_artifact_path("zhihu_login_failed.png")
 
     _notify_failure(
         config,
@@ -145,7 +141,7 @@ def _add_topic(page, topic: str) -> None:
         item.wait_for(state="visible", timeout=8000)
         item.click()
     except PlaywrightTimeoutError as exc:
-        page.screenshot(path="logs/topic_not_found.png", full_page=True)
+        page.screenshot(path=str(log_artifact_path("topic_not_found.png")), full_page=True)
         raise ZhihuPostError(f"topic not found: {topic}") from exc
     page.wait_for_timeout(500)
 
@@ -169,10 +165,9 @@ def _click_publish(page, timeout_sec: int, *, before_delay_sec: float, after_del
     try:
         page.wait_for_url("**/zhuanlan.zhihu.com/p/**", timeout=timeout_sec * 1000)
     except PlaywrightTimeoutError as exc:
-        html_path = Path("logs/publish_timeout.html")
-        html_path.parent.mkdir(parents=True, exist_ok=True)
+        html_path = log_artifact_path("publish_timeout.html")
         html_path.write_text(page.content(), encoding="utf-8")
-        page.screenshot(path="logs/publish_timeout.png", full_page=True)
+        page.screenshot(path=str(log_artifact_path("publish_timeout.png")), full_page=True)
         raise ZhihuPostError(f"publish timeout ({timeout_sec}s)") from exc
 
     return _to_article_url(page.url)
@@ -232,7 +227,7 @@ def post_zhihu(
 
     try:
         session = launch_browser(
-            browser_cfg,
+            {**browser_cfg, "headless": False},
             auth_state=zhihu_cfg["auth_state"],
             profile_subdir=zhihu_cfg.get("profile_dir", "zhihu_profile"),
         )
@@ -240,12 +235,22 @@ def post_zhihu(
         page.goto(zhihu_cfg["write_url"], wait_until="domcontentloaded")
         page.wait_for_timeout(2000)
 
-        if _is_login_required(page):
-            shot = _failure_screenshot(page, "zhihu_login_failed.png")
-            raise ZhihuLoginError(
-                "Zhihu login expired. Run: python scripts/init_zhihu_auth.py "
-                f"(screenshot: {shot})"
-            )
+        if is_zhihu_login_required(page):
+            logger.warning("Zhihu login required, waiting for QR scan")
+            ok = wait_for_zhihu_login(session, config)
+            if not ok:
+                raise ZhihuLoginError(
+                    "Zhihu login expired; QR wait timed out",
+                    already_notified=True,
+                )
+            page.goto(zhihu_cfg["write_url"], wait_until="domcontentloaded")
+            page.wait_for_timeout(2000)
+            if is_zhihu_login_required(page):
+                shot = _failure_screenshot(page, "zhihu_login_failed.png")
+                raise ZhihuLoginError(
+                    "QR wait reported success but write page still requires login "
+                    f"(screenshot: {shot})"
+                )
 
         _fill_title(page, title)
         _fill_body(page, body)

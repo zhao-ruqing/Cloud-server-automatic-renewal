@@ -24,8 +24,9 @@ from utils.expiry_scheduler import (
     should_run_by_expiry,
     should_warn_audit_stale,
 )
-from utils.logger import ROOT as DATA_ROOT, create_output_dir, load_json, save_json, setup_logger
+from utils.logger import ROOT as DATA_ROOT, DEFAULT_LOG_FILE, create_output_dir, load_json, save_json, setup_logger
 from utils.notify import send_audit_stale_email
+from utils.run_lock import RunLock
 from utils.scheduler import write_meta
 
 CLOUD_PROVIDERS = ("sanfeng", "abeiyun")
@@ -106,8 +107,8 @@ def resolve_providers_to_run(
             expiry = fetch_cloud_expiry(cfg, browser_cfg, name)
             ok, reason = should_run_by_expiry(
                 expiry,
-                hours_before_min=cfg.get("run_hours_before_min", 10),
-                hours_before_max=cfg.get("run_hours_before_max", 23),
+                hours_before_min=cfg.get("run_hours_before_min", 0),
+                hours_before_max=cfg.get("run_hours_before_max", 26),
                 state_file=cfg.get("state_file", f"data/{name}_schedule.json"),
                 ignore_cycle=ignore_cycle,
             )
@@ -201,10 +202,38 @@ def main(
 ) -> int:
     load_dotenv(ROOT / ".env")
     config = load_config()
-    logger = setup_logger(config.get("logging", {}).get("file", "logs/run_{date}.log"))
+    logger = setup_logger(config.get("logging", {}).get("file", DEFAULT_LOG_FILE))
 
+    lock = RunLock()
+    ok, reason = lock.acquire()
+    logger.info("run lock: %s", reason)
+    if not ok:
+        return 0
+
+    try:
+        return _run(
+            config,
+            logger,
+            force=force,
+            keepalive_only=keepalive_only,
+            only_provider=only_provider,
+            scheduled=scheduled,
+        )
+    finally:
+        lock.release()
+
+
+def _run(
+    config: dict,
+    logger,
+    *,
+    force: bool,
+    keepalive_only: bool,
+    only_provider: str | None,
+    scheduled: bool,
+) -> int:
     if keepalive_only:
-        ok, reason = should_run_keepalive(config)
+        ok, reason = should_run_keepalive(config, force=force)
         logger.info("keepalive-only: %s", reason)
         if ok:
             run_zhihu_keepalive(config)
@@ -250,7 +279,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--force",
         action="store_true",
-        help="Run all enabled providers now (ignore expiry window)",
+        help="Ignore expiry window, or with --keepalive-only ignore the 2h interval",
     )
     parser.add_argument(
         "--scheduled",

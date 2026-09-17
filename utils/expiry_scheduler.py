@@ -46,11 +46,16 @@ def should_run_by_expiry(
         return True, "force mode (ignore window and cycle)"
 
     remaining = hours_until(expiry)
-    if remaining < 0:
+    if remaining <= 0:
         return False, f"expired {abs(remaining):.1f}h ago, skip"
-    if not (hours_before_min <= remaining <= hours_before_max):
+    if remaining > hours_before_max:
         return False, (
             f"{remaining:.1f}h until expiry, outside window "
+            f"(trigger when <= {hours_before_max}h)"
+        )
+    if hours_before_min > 0 and remaining < hours_before_min:
+        return False, (
+            f"{remaining:.1f}h until expiry, below min window "
             f"[{hours_before_min}, {hours_before_max}]h"
         )
 

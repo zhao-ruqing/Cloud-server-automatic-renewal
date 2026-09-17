@@ -41,4 +41,7 @@ ZHIHU = {
     "publish_btn": 'button.Button--primary:has-text("\u53d1\u5e03")',
     "login_text": "\u767b\u5f55\u77e5\u4e4e",
     "review_text": "\u5ba1\u6838",
+    "qr_container": ".Qrcode-container",
+    "qr_image": ".Qrcode-qrcode",
+    "captcha": ".yidun, .geetest_holder, iframe[src*='captcha']",
 }

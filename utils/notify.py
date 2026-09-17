@@ -142,6 +142,59 @@ def send_zhihu_failure_email(
     )
 
 
+_RELOGIN_LABELS = {
+    "pending": "知乎待扫码登录",
+    "refresh": "知乎仍未登录已换新码",
+    "success": "知乎登录成功",
+    "timeout": "知乎扫码等待超时",
+}
+
+
+def send_zhihu_relogin_email(
+    config: dict[str, Any],
+    *,
+    kind: str,
+    reason: str,
+    page_url: str = "",
+    screenshot_path: str | Path | None = None,
+) -> bool:
+    """QR wait emails: pending / refresh / success / timeout."""
+    smtp_cfg = _resolve_email_config(config)
+    if not smtp_cfg:
+        return False
+
+    label = _RELOGIN_LABELS.get(kind, "知乎登录待处理")
+    now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    lines = [
+        f"【{label}】",
+        "",
+        f"时间：{now}",
+        f"说明：{reason}",
+    ]
+    if page_url:
+        lines.append(f"当前 URL：{page_url}")
+
+    if kind == "success":
+        lines.extend(["", "Cookie 已写入本机 profile，后续发帖/保活会继续。"])
+    else:
+        lines.extend(
+            [
+                "",
+                "请尽快用知乎 App 扫描附件二维码。",
+                "这张码绑定的是服务器上正在开着的 Chrome，不要关那个窗口，也不要断远程桌面。",
+                "二维码通常一两分钟就过期：过期可直接扫服务器页面上的新码，或等下一封邮件。",
+                "扫码成功后页面会自动跳转，脚本会自己检测到，无需回信。",
+            ]
+        )
+
+    return _send_email(
+        smtp_cfg,
+        subject=f"[云续期脚本] {label}",
+        body="\n".join(lines),
+        screenshot_path=screenshot_path if kind != "success" else None,
+    )
+
+
 def send_audit_stale_email(
     config: dict[str, Any],
     *,

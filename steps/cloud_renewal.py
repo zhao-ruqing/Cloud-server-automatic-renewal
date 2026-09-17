@@ -11,6 +11,7 @@ from playwright.sync_api import Page, TimeoutError as PlaywrightTimeoutError
 
 from utils.browser import BrowserSession, launch_browser
 from utils.expiry_scheduler import parse_expiry_after_label, parse_expiry_datetime
+from utils.logger import log_artifact_path
 from utils.selectors import CLOUD
 
 logger = logging.getLogger("sanfeng")
@@ -46,7 +47,7 @@ def _do_login(page: Page, wait_sec: float, provider: str) -> None:
             timeout=30000,
         )
     except PlaywrightTimeoutError as exc:
-        page.screenshot(path=f"logs/{provider}_login_failed.png", full_page=False)
+        page.screenshot(path=str(log_artifact_path(f"{provider}_login_failed.png")), full_page=False)
         raise CloudRenewalError(f"{provider} login timeout") from exc
 
 
@@ -98,7 +99,7 @@ def read_expiry_from_page(page: Page, timeout_sec: float = 30) -> datetime:
             waiting_logged = True
         page.wait_for_timeout(500)
 
-    page.screenshot(path="logs/expiry_not_found.png", full_page=False)
+    page.screenshot(path=str(log_artifact_path("expiry_not_found.png")), full_page=False)
     raise CloudRenewalError("Expiry datetime not found after label")
 
 

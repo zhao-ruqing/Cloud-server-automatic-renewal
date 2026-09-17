@@ -6,20 +6,34 @@ from pathlib import Path
 from typing import Any
 
 ROOT = Path(__file__).resolve().parent.parent
+DEFAULT_LOG_FILE = "logs/{year_month}/run_{date}.log"
 
 
-def resolve_log_path(log_file: str = "logs/run_{date}.log") -> Path:
-    """Build daily log path. Supports {date}; bare run.log becomes run_YYYY-MM-DD.log."""
-    today = datetime.now().strftime("%Y-%m-%d")
-    if "{date}" in log_file:
-        resolved = log_file.replace("{date}", today)
+def resolve_log_path(log_file: str = DEFAULT_LOG_FILE) -> Path:
+    """Build log path. {year_month}=YYYY-MM, {date}=YYYY-MM-DD."""
+    now = datetime.now()
+    today = now.strftime("%Y-%m-%d")
+    year_month = now.strftime("%Y-%m")
+    if "{date}" in log_file or "{year_month}" in log_file:
+        resolved = log_file.replace("{year_month}", year_month).replace("{date}", today)
     else:
         path = Path(log_file)
         resolved = str(path.with_name(f"{path.stem}_{today}{path.suffix}"))
     return ROOT / resolved
 
 
-def setup_logger(log_file: str = "logs/run_{date}.log") -> logging.Logger:
+def log_artifact_dir() -> Path:
+    """Monthly dir for screenshots and HTML dumps, e.g. logs/2026-09/."""
+    path = ROOT / "logs" / datetime.now().strftime("%Y-%m")
+    path.mkdir(parents=True, exist_ok=True)
+    return path
+
+
+def log_artifact_path(filename: str) -> Path:
+    return log_artifact_dir() / filename
+
+
+def setup_logger(log_file: str = DEFAULT_LOG_FILE) -> logging.Logger:
     log_path = resolve_log_path(log_file)
     log_path.parent.mkdir(parents=True, exist_ok=True)
 

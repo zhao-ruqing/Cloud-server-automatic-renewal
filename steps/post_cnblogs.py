@@ -11,6 +11,7 @@ import pyperclip
 from playwright.sync_api import TimeoutError as PlaywrightTimeoutError
 
 from utils.browser import BrowserSession, launch_browser
+from utils.logger import log_artifact_path
 from utils.notify import send_cnblogs_failure_email
 from utils.selectors import CNBLOGS
 from utils.viewport import random_viewport
@@ -52,8 +53,7 @@ def _collect_page_errors(page) -> str:
 
 
 def _failure_screenshot(page, filename: str) -> Path:
-    path = Path("logs") / filename
-    path.parent.mkdir(parents=True, exist_ok=True)
+    path = log_artifact_path(filename)
     page.screenshot(path=str(path), full_page=False)
     return path
 
@@ -260,11 +260,11 @@ def _handle_post_failure(
 
     screenshot_path: Path | str | None = None
     if isinstance(exc, CnblogsPostError) and "publish timeout" in str(exc):
-        screenshot_path = Path("logs/cnblogs_publish_timeout.png")
+        screenshot_path = log_artifact_path("cnblogs_publish_timeout.png")
     elif isinstance(exc, CnblogsPostError) and "published article link not found" in str(exc):
-        screenshot_path = Path("logs/cnblogs_article_link_not_found.png")
+        screenshot_path = log_artifact_path("cnblogs_article_link_not_found.png")
     elif isinstance(exc, CnblogsLoginError):
-        screenshot_path = Path("logs/cnblogs_login_failed.png")
+        screenshot_path = log_artifact_path("cnblogs_login_failed.png")
 
     _notify_failure(
         config,

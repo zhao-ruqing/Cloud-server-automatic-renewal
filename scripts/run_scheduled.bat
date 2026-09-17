@@ -2,7 +2,8 @@
 chcp 65001 >nul
 cd /d "%~dp0.."
 
-if not exist "logs" mkdir "logs"
+for /f %%i in ('powershell -NoProfile -Command "Get-Date -Format yyyy-MM"') do set YM=%%i
+if not exist "logs\%YM%" mkdir "logs\%YM%"
 
 echo ========================================
 echo Sanfeng / Abeiyun scheduled run
@@ -23,9 +24,9 @@ set EXITCODE=%ERRORLEVEL%
 
 echo.
 echo Finished with exit code %EXITCODE%
-echo Log also appends to logs\scheduled.log
+echo Log also appends to logs\%YM%\scheduled.log
 
->> "logs\scheduled.log" echo ===== %DATE% %TIME% exit=%EXITCODE% =====
+>> "logs\%YM%\scheduled.log" echo ===== %DATE% %TIME% exit=%EXITCODE% =====
 
 if not "%1"=="nopause" pause
 exit /b %EXITCODE%
