@@ -4,12 +4,15 @@
 import logging
 import os
 import smtplib
+import traceback
 from datetime import datetime
 from email.mime.application import MIMEApplication
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from pathlib import Path
 from typing import Any
+
+from utils.logger import DEFAULT_LOG_FILE, log_artifact_path, resolve_log_path
 
 logger = logging.getLogger("sanfeng")
 
@@ -291,3 +294,127 @@ def send_cnblogs_failure_email(
         body="\n".join(lines),
         screenshot_path=screenshot_path,
     )
+
+
+_STEP_LABELS = {
+    "expiry check": "读取云到期时间",
+    "keepalive": "知乎保活",
+    "pipeline": "续期流水线",
+    "main": "主流程",
+    "AI generate": "AI 生成文章",
+    "cloud renewal": "云厂商填表",
+    "zhihu post": "知乎发帖",
+    "zhihu login": "知乎登录",
+    "browser": "启动浏览器",
+}
+
+_EXC_STEPS = {
+    "ContentGenerationError": "AI generate",
+    "CloudRenewalError": "cloud renewal",
+    "ZhihuPostError": "zhihu post",
+    "ZhihuLoginError": "zhihu login",
+}
+
+
+def _refine_step(exc: BaseException, step: str) -> str:
+    inferred = _EXC_STEPS.get(type(exc).__name__, "")
+    if inferred:
+        return inferred
+    if "Failed to launch browser" in str(exc) or "mkdtemp" in str(exc):
+        return "browser"
+    return step or "main"
+
+
+def _guess_error_screenshot(exc: BaseException, provider: str | None) -> Path | None:
+    text = str(exc)
+    names: list[str] = []
+    if "Expiry datetime not found" in text:
+        names.append("expiry_not_found.png")
+    if provider and ("login timeout" in text or "credentials empty" in text):
+        names.append(f"{provider}_login_failed.png")
+    for name in names:
+        path = log_artifact_path(name)
+        if path.is_file():
+            return path
+    return None
+
+
+def notify_task_error(
+    config: dict[str, Any],
+    exc: BaseException,
+    *,
+    provider: str | None = None,
+    step: str = "",
+    screenshot_path: str | Path | None = None,
+) -> bool:
+    """Email unexpected failures. Skips Ctrl+C and errors already mailed."""
+    if isinstance(exc, (KeyboardInterrupt, SystemExit)):
+        return False
+    if getattr(exc, "already_notified", False):
+        logger.info("Skip duplicate error email: %s", exc)
+        return False
+
+    smtp_cfg = _resolve_email_config(config)
+    if not smtp_cfg:
+        try:
+            exc.already_notified = True
+        except Exception:
+            pass
+        return False
+
+    step_key = _refine_step(exc, step)
+    step_label = _STEP_LABELS.get(step_key, step_key)
+    provider_label = _PROVIDER_LABELS.get(provider or "", provider or "")
+    now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    log_file = (config.get("logging") or {}).get("file", DEFAULT_LOG_FILE)
+    log_path = resolve_log_path(str(log_file))
+    shot: Path | str | None = screenshot_path
+    if shot:
+        shot = Path(shot)
+        if not shot.is_file():
+            shot = None
+    else:
+        shot = _guess_error_screenshot(exc, provider)
+
+    tb = "".join(traceback.format_exception(type(exc), exc, exc.__traceback__))
+    if len(tb) > 2000:
+        tb = tb[:2000] + "\n...(truncated)"
+
+    lines = [
+        "【任务异常】需人工处理",
+        "",
+        f"时间：{now}",
+        f"步骤：{step_label}",
+    ]
+    if provider_label:
+        lines.append(f"云厂商：{provider_label}")
+    lines.extend(
+        [
+            f"异常类型：{type(exc).__name__}",
+            f"失败原因：{exc}",
+            f"日志：{log_path}",
+        ]
+    )
+    if shot:
+        lines.append(f"截图：{shot}")
+    lines.extend(
+        [
+            "",
+            "堆栈：",
+            tb,
+            "",
+            "下次定时任务会再试。已单独发过知乎扫码/发帖失败的，不会再重复这封。",
+        ]
+    )
+
+    sent = _send_email(
+        smtp_cfg,
+        subject=f"[云续期脚本] 任务异常：{step_label}",
+        body="\n".join(lines),
+        screenshot_path=shot,
+    )
+    try:
+        exc.already_notified = True
+    except Exception:
+        pass
+    return sent

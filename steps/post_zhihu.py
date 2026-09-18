@@ -287,6 +287,7 @@ def post_zhihu(
             provider=provider,
             article_title=title,
         )
+        exc.already_notified = True
         raise
     except Exception as exc:
         wrapped = ZhihuPostError(str(exc))
@@ -297,6 +298,7 @@ def post_zhihu(
             provider=provider,
             article_title=title,
         )
+        wrapped.already_notified = True
         raise wrapped from exc
     finally:
         if session:

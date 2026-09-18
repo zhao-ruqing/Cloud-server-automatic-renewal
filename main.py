@@ -25,7 +25,7 @@ from utils.expiry_scheduler import (
     should_warn_audit_stale,
 )
 from utils.logger import ROOT as DATA_ROOT, DEFAULT_LOG_FILE, create_output_dir, load_json, save_json, setup_logger
-from utils.notify import send_audit_stale_email
+from utils.notify import notify_task_error, send_audit_stale_email
 from utils.run_lock import RunLock
 from utils.scheduler import write_meta
 
@@ -123,7 +123,8 @@ def resolve_providers_to_run(
             else:
                 _maybe_send_audit_warn(name, config, expiry, logger)
         except Exception as exc:
-            logger.error("[%s] expiry check failed: %s", name, exc)
+            logger.error("[%s] expiry check failed: %s", name, exc, exc_info=True)
+            notify_task_error(config, exc, provider=name, step="expiry check")
 
     return to_run
 
@@ -219,6 +220,13 @@ def main(
             only_provider=only_provider,
             scheduled=scheduled,
         )
+    except KeyboardInterrupt:
+        logger.info("Cancelled")
+        return 130
+    except Exception as exc:
+        logger.error("Fatal: %s", exc, exc_info=True)
+        notify_task_error(config, exc, step="main")
+        return 1
     finally:
         lock.release()
 
@@ -235,9 +243,15 @@ def _run(
     if keepalive_only:
         ok, reason = should_run_keepalive(config, force=force)
         logger.info("keepalive-only: %s", reason)
-        if ok:
+        if not ok:
+            return 0
+        try:
             run_zhihu_keepalive(config)
-        return 0
+            return 0
+        except Exception as exc:
+            logger.error("keepalive-only failed: %s", exc, exc_info=True)
+            notify_task_error(config, exc, step="keepalive")
+            return 1
 
     if not scheduled and not force:
         logger.info("Manual run: in expiry window will rerun even if already processed")
@@ -249,16 +263,24 @@ def _run(
     if not providers:
         ok, reason = should_run_keepalive(config)
         logger.info("No cloud renewal due. keepalive: %s", reason)
-        if ok:
+        if not ok:
+            return 0
+        try:
             run_zhihu_keepalive(config)
-        return 0
+            return 0
+        except Exception as exc:
+            logger.error("keepalive failed: %s", exc, exc_info=True)
+            notify_task_error(config, exc, step="keepalive")
+            return 1
 
     output_dir = create_output_dir(config.get("output", {}).get("base_dir", "output"))
     logger.info("Providers to run (isolated): %s | output: %s", providers, output_dir)
     started = time.time()
+    current_provider: str | None = None
 
     try:
         for provider in providers:
+            current_provider = provider
             logger.info("===== pipeline %s =====", provider)
             run_provider_pipeline(provider, config, output_dir, logger)
 
@@ -271,6 +293,7 @@ def _run(
         duration = time.time() - started
         write_meta(output_dir, success=False, duration_sec=duration, error=str(exc))
         logger.error("Failed: %s", exc, exc_info=True)
+        notify_task_error(config, exc, provider=current_provider, step="pipeline")
         return 1
 
 

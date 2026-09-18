@@ -12,6 +12,7 @@ sys.path.insert(0, str(ROOT))
 
 from steps.zhihu_keepalive import run_zhihu_keepalive, should_run_keepalive
 from utils.logger import DEFAULT_LOG_FILE, setup_logger
+from utils.notify import notify_task_error
 from utils.run_lock import RunLock
 
 
@@ -34,6 +35,10 @@ def main() -> None:
             run_zhihu_keepalive(config)
         else:
             logger.info("skip keepalive")
+    except Exception as exc:
+        logger.error("keepalive failed: %s", exc, exc_info=True)
+        notify_task_error(config, exc, step="keepalive")
+        raise
     finally:
         lock.release()
 

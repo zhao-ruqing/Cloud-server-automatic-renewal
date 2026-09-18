@@ -335,6 +335,7 @@ def post_cnblogs(
             provider=provider,
             article_title=title,
         )
+        exc.already_notified = True
         raise
     except Exception as exc:
         wrapped = CnblogsPostError(str(exc))
@@ -345,6 +346,7 @@ def post_cnblogs(
             provider=provider,
             article_title=title,
         )
+        wrapped.already_notified = True
         raise wrapped from exc
     finally:
         if session:
