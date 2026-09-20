@@ -29,7 +29,7 @@ from utils.notify import notify_task_error, send_audit_stale_email
 from utils.run_lock import RunLock
 from utils.scheduler import write_meta
 
-CLOUD_PROVIDERS = ("sanfeng", "abeiyun")
+CLOUD_PROVIDERS = ("sanfeng", "sanfeng2")
 
 
 def load_config(path: Path | None = None) -> dict:
@@ -312,7 +312,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--provider",
         choices=CLOUD_PROVIDERS,
-        help="Run only this provider (sanfeng or abeiyun)",
+        help="Run only this provider (sanfeng or sanfeng2)",
     )
     parser.add_argument(
         "--keepalive-only",

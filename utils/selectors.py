@@ -1,11 +1,13 @@
 # -*- coding: utf-8 -*-
 """Page selectors. Chinese UI text is Unicode-escaped so source stays ASCII."""
 
-# Shared Sanfeng / Abeiyun console
+# Shared Sanfeng console (both accounts)
 CLOUD = {
     "login_btn": "#loginSubmit",
     "username": "#userName",
     "password": "#passwordInput",
+    "user_menu": ".header-link-user",
+    "logout_link": '.header-user-links a:has-text("\u5b89\u5168\u9000\u51fa")',
     "nav_extend_btn": 'button.el-button--primary:has-text("\u514d\u8d39\u5ef6\u671f")',
     "extend_tab": "#tab-seven",
     "url_input": 'input[placeholder="\u8bf7\u8f93\u5165\u53d1\u5e16\u7f51\u5740http://"]',

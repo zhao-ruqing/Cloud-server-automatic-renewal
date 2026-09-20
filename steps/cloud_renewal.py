@@ -2,6 +2,7 @@
 """Shared cloud renewal: login, read expiry, fill renewal form."""
 
 import logging
+import os
 import time
 from datetime import datetime
 from pathlib import Path
@@ -28,19 +29,78 @@ def _is_login_page(page: Page) -> bool:
     return login_btn.count() > 0 and login_btn.first.is_visible()
 
 
-def _do_login(page: Page, wait_sec: float, provider: str) -> None:
+def _resolve_credentials(provider_cfg: dict[str, Any], provider: str) -> tuple[str, str]:
+    username = os.environ.get(provider_cfg.get("username_env", ""), "").strip()
+    password = os.environ.get(provider_cfg.get("password_env", ""), "").strip()
+    if not username or not password:
+        raise CloudRenewalError(
+            f"{provider} credentials empty. Set "
+            f"{provider_cfg.get('username_env')} / {provider_cfg.get('password_env')} in .env"
+        )
+    return username, password
+
+
+def _open_login_page(page: Page, login_url: str) -> None:
+    page.goto(login_url, wait_until="domcontentloaded", timeout=60000)
+    page.wait_for_timeout(1500)
+
+
+def _do_logout(page: Page, login_url: str, provider: str) -> None:
+    """Expand the header user menu and click 安全退出, then return to login URL."""
+    if _is_login_page(page):
+        return
+
+    user_menu = page.locator(CLOUD["user_menu"]).first
+    try:
+        user_menu.wait_for(state="visible", timeout=10000)
+    except PlaywrightTimeoutError:
+        logger.warning("[%s] user menu not found, opening login URL", provider)
+        _open_login_page(page, login_url)
+        return
+
+    logger.info("[%s] logout via header user menu", provider)
+    user_menu.click()
+    page.wait_for_timeout(400)
+    logout_link = page.locator(CLOUD["logout_link"]).first
+    try:
+        logout_link.wait_for(state="visible", timeout=5000)
+    except PlaywrightTimeoutError:
+        user_menu.hover()
+        page.wait_for_timeout(400)
+        logout_link.wait_for(state="visible", timeout=5000)
+    logout_link.click()
+
+    try:
+        page.wait_for_function(
+            "() => window.location.href.toLowerCase().includes('/login')",
+            timeout=15000,
+        )
+    except PlaywrightTimeoutError:
+        logger.warning("[%s] logout did not reach login page, navigating", provider)
+        _open_login_page(page, login_url)
+        return
+    page.wait_for_timeout(1000)
+
+
+def _do_login(page: Page, provider_cfg: dict[str, Any], provider: str) -> None:
+    username, password = _resolve_credentials(provider_cfg, provider)
     login_btn = page.locator(CLOUD["login_btn"])
     login_btn.wait_for(state="visible", timeout=15000)
 
-    username = page.locator(CLOUD["username"])
-    password = page.locator(CLOUD["password"])
-    if username.input_value().strip() == "" or password.input_value().strip() == "":
-        raise CloudRenewalError(
-            f"{provider} credentials empty. Run init script first."
-        )
+    user_input = page.locator(CLOUD["username"]).first
+    pass_input = page.locator(CLOUD["password"]).first
+    user_input.wait_for(state="visible", timeout=15000)
+    user_input.click()
+    user_input.fill(username)
+    pass_input.click()
+    pass_input.fill(password)
+    page.wait_for_timeout(200)
+    user_input.fill(username)
+    pass_input.fill(password)
 
+    logger.info("[%s] login as %s", provider, username)
     login_btn.click()
-    page.wait_for_timeout(int(wait_sec * 1000))
+    page.wait_for_timeout(int(provider_cfg.get("login_wait_sec", 2) * 1000))
     try:
         page.wait_for_function(
             "() => !window.location.href.toLowerCase().includes('/login')",
@@ -49,6 +109,18 @@ def _do_login(page: Page, wait_sec: float, provider: str) -> None:
     except PlaywrightTimeoutError as exc:
         page.screenshot(path=str(log_artifact_path(f"{provider}_login_failed.png")), full_page=False)
         raise CloudRenewalError(f"{provider} login timeout") from exc
+
+
+def login_cloud_account(page: Page, provider_cfg: dict[str, Any], provider: str) -> None:
+    """If already logged in, logout first, then fill this account on the login page."""
+    login_url = provider_cfg["login_url"]
+    logger.info("[%s] open login: %s", provider, login_url)
+    _open_login_page(page, login_url)
+    if not _is_login_page(page):
+        _do_logout(page, login_url, provider)
+        if not _is_login_page(page):
+            _open_login_page(page, login_url)
+    _do_login(page, provider_cfg, provider)
 
 
 def _parse_expiry_once(page: Page) -> datetime | None:
@@ -112,10 +184,7 @@ def fetch_cloud_expiry(provider_cfg: dict[str, Any], browser_cfg: dict[str, Any]
             profile_subdir=provider_cfg.get("profile_dir"),
         )
         page = session.page
-        page.goto(provider_cfg["login_url"], wait_until="domcontentloaded", timeout=60000)
-        page.wait_for_timeout(1500)
-        if _is_login_page(page):
-            _do_login(page, provider_cfg.get("login_wait_sec", 2), provider)
+        login_cloud_account(page, provider_cfg, provider)
 
         server_url = provider_cfg["server_url"]
         page.goto(server_url, wait_until="domcontentloaded", timeout=60000)
@@ -124,6 +193,10 @@ def fetch_cloud_expiry(provider_cfg: dict[str, Any], browser_cfg: dict[str, Any]
             page,
             timeout_sec=provider_cfg.get("expiry_load_timeout_sec", 30),
         )
+        try:
+            _do_logout(page, provider_cfg["login_url"], provider)
+        except Exception as exc:
+            logger.warning("[%s] logout after expiry check failed: %s", provider, exc)
         session.save_state(provider_cfg["auth_state"])
         return expiry
     finally:
@@ -194,12 +267,7 @@ def submit_cloud_renewal(
             profile_subdir=provider_cfg.get("profile_dir"),
         )
         page = session.page
-
-        logger.info("[%s] open login: %s", provider, provider_cfg["login_url"])
-        page.goto(provider_cfg["login_url"], wait_until="domcontentloaded", timeout=60000)
-        page.wait_for_timeout(1500)
-        if _is_login_page(page):
-            _do_login(page, provider_cfg.get("login_wait_sec", 2), provider)
+        login_cloud_account(page, provider_cfg, provider)
 
         server_url = provider_cfg["server_url"]
         logger.info("[%s] open server nav: %s", provider, server_url)
@@ -229,6 +297,10 @@ def submit_cloud_renewal(
         if pause_sec > 0:
             page.wait_for_timeout(int(pause_sec * 1000))
 
+        try:
+            _do_logout(page, provider_cfg["login_url"], provider)
+        except Exception as exc:
+            logger.warning("[%s] logout after renewal failed: %s", provider, exc)
         session.save_state(provider_cfg["auth_state"])
         return {
             "skipped": False,

@@ -1,50 +1,11 @@
 # -*- coding: utf-8 -*-
-"""Init Abeiyun login state."""
+"""Abeiyun is retired; this script now inits the second Sanfeng account."""
 
+import runpy
 import sys
 from pathlib import Path
 
-import yaml
-from dotenv import load_dotenv
-
-ROOT = Path(__file__).resolve().parent.parent
-sys.path.insert(0, str(ROOT))
-
-from utils.browser import launch_auth_browser
-
-
-def main() -> None:
-    load_dotenv(ROOT / ".env")
-    with (ROOT / "config.yaml").open(encoding="utf-8") as f:
-        config = yaml.safe_load(f)
-
-    abei_cfg = config["abeiyun"]
-    browser_cfg = {**config["browser"], "headless": False, "slow_mo": 0}
-
-    print("=" * 55)
-    print("Abeiyun login init")
-    print("=" * 55)
-    print("1. Login page will open")
-    print("2. Confirm credentials filled, click Login")
-    print("3. Press Enter here to save")
-    print("=" * 55)
-
-    session = None
-    try:
-        session = launch_auth_browser(browser_cfg, abei_cfg.get("profile_dir", "abeiyun_profile"))
-        page = session.page
-        page.goto(abei_cfg["login_url"], wait_until="domcontentloaded", timeout=60000)
-
-        input("\nAfter login, press Enter to save... ")
-        session.save_state(abei_cfg["auth_state"])
-        print(f"Saved: {abei_cfg['auth_state']}")
-
-    except KeyboardInterrupt:
-        print("\nCancelled.")
-    finally:
-        if session:
-            session.close()
-
-
-if __name__ == "__main__":
-    main()
+print("Abeiyun is retired. Initializing sanfeng2 instead.")
+script = Path(__file__).with_name("init_sanfeng_auth.py")
+sys.argv = [str(script), "--provider", "sanfeng2"]
+runpy.run_path(str(script), run_name="__main__")

@@ -50,6 +50,8 @@ sanfeng:
   auth_state: "auth/sanfeng_state.json"
   profile_dir: "sanfeng_profile"
   state_file: "data/sanfeng_schedule.json"
+  username_env: "SANFENG_USERNAME"
+  password_env: "SANFENG_PASSWORD"
   run_hours_before_min: 0
   run_hours_before_max: 26
   login_wait_sec: 2
@@ -69,15 +71,17 @@ sanfeng:
       - "三丰云服务器"
       - "免费云服务器"
 
-abeiyun:
+sanfeng2:
   enabled: true
   fill_form: true
   submit_form: true
-  login_url: "https://www.abeiyun.com/login/"
-  server_url: "https://www.abeiyun.com/control/#/freeServer/1883838"
-  auth_state: "auth/abeiyun_state.json"
-  profile_dir: "abeiyun_profile"
-  state_file: "data/abeiyun_schedule.json"
+  login_url: "https://www.sanfengyun.com/login/"
+  server_url: "https://www.sanfengyun.com/control/#/freeServer/532941"
+  auth_state: "auth/sanfeng2_state.json"
+  profile_dir: "sanfeng_profile"
+  state_file: "data/sanfeng2_schedule.json"
+  username_env: "SANFENG2_USERNAME"
+  password_env: "SANFENG2_PASSWORD"
   run_hours_before_min: 0
   run_hours_before_max: 26
   login_wait_sec: 2
@@ -85,16 +89,16 @@ abeiyun:
   expiry_load_timeout_sec: 30
   pause_before_close_sec: 5
   content:
-    brand_name: "阿贝云"
-    brand_obfuscated: "阿贝云"
-    brand_server_obfuscated: "阿贝云服务器"
+    brand_name: "三丰云"
+    brand_obfuscated: "三丰云"
+    brand_server_obfuscated: "三丰云服务器"
     topics:
       - "云服务器"
       - "Docker"
     zhihu_topics:
-      - "阿贝云"
+      - "三丰云服务器"
     required_keywords:
-      - "阿贝云服务器"
+      - "三丰云服务器"
       - "免费云服务器"
 
 browser:

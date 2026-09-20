@@ -117,7 +117,7 @@ def generate_content(config: dict[str, Any], provider: str) -> dict[str, str]:
                         "content": (
                             "你只能用简体中文写作。title 和 body 必须是简体中文。"
                             "你是程序员在知乎写技术笔记，不是营销文案写手。"
-                            "品牌名直接写即可（如 三丰云、阿贝云），不要用反斜杠分隔。"
+                            "品牌名直接写即可（如 三丰云），不要用反斜杠分隔。"
                             "文章要有开头、1/2/3 分点、结尾，语气真实自然，侧重技术分享。"
                             f"硬性限制：body 字数（含标点）必须在 "
                             f"{ai_cfg['min_body_length']}-{ai_cfg['max_body_length']} 之间，"

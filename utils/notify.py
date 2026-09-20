@@ -17,8 +17,8 @@ from utils.logger import DEFAULT_LOG_FILE, log_artifact_path, resolve_log_path
 logger = logging.getLogger("sanfeng")
 
 _PROVIDER_LABELS = {
-    "sanfeng": "三丰云",
-    "abeiyun": "阿贝云",
+    "sanfeng": "三丰云(17658501696)",
+    "sanfeng2": "三丰云(18563200721)",
 }
 
 _FAILURE_LABELS = {
