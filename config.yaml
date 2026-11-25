@@ -11,8 +11,8 @@ ai:
   model: "deepseek-v4-flash"
   prompt_file: "prompts/article.txt"
   min_body_length: 500
-  max_body_length: 1000
-  max_retries: 3
+  max_body_length: 3000
+  max_retries: 5
 
 zhihu:
   write_url: "https://zhuanlan.zhihu.com/write"
@@ -63,9 +63,13 @@ sanfeng:
     brand_obfuscated: "三丰云"
     brand_server_obfuscated: "三丰云服务器"
     topics:
-      - "云服务器"
-      - "Linux部署"
+      - "Linux 部署"
+      - "Nginx 反代"
+      - "Python 服务托管"
+    # Keep brand topic for renewal; add tech topics so the post looks less like pure promo.
     zhihu_topics:
+      - "Linux"
+      - "服务器"
       - "三丰云服务器"
     required_keywords:
       - "三丰云服务器"
@@ -93,9 +97,12 @@ sanfeng2:
     brand_obfuscated: "三丰云"
     brand_server_obfuscated: "三丰云服务器"
     topics:
-      - "云服务器"
       - "Docker"
+      - "systemd"
+      - "运维踩坑"
     zhihu_topics:
+      - "Docker"
+      - "运维"
       - "三丰云服务器"
     required_keywords:
       - "三丰云服务器"
